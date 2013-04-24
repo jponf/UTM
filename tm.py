@@ -102,11 +102,69 @@ class TuringMachine:
 
     #
     #
+    def run(self, max_steps=None):
+        """
+        run(max_steps=None): int
+        
+        Perform steps until 'halt' or 'max steps'        
+        
+        Return values:
+            0 - Ends by halt state
+            1 - Ends by max steps limit
+        """
+        if max_steps:
+            try:
+
+                for i in xrange(max_steps):
+                    self.step()
+                return  1
+            except tmexceptions.HaltStateException:
+                return 0
+                
+        else:
+            
+            while not self.isAtHaltState():
+                self.step()
+            return 0
+
+    #
+    #
     def getCurrentState(self):
         """
         Returns the current state (Cpt. Obvious)
         """
         return self.cur_state
+
+    #
+    #
+    def getSymbolAt(self, pos):
+        """
+        Returns the symbol at the specified position
+        
+        The internal symbols goes from 0 to getInternalTapeSize()
+        for any other position out of this range the blank symbol is returned
+        """
+        if pos < 0 or pos > len(self.tape):
+            return self.blank
+            
+        return self.tape[pos]
+        
+    #
+    #
+    def getInternalTapeSize(self):
+        """
+        Returns the size of the internal tape representation
+        """
+        return len(self.tape)
+            
+    
+    #
+    #
+    def getHeadPosition(self):
+        """
+        Returns the current head position
+        """
+        return self.head
 
     #
     #
@@ -218,7 +276,7 @@ class TuringMachine:
     #
     #
     def __str__(self):
-        return    'States: %s\n' \
+        return  'States: %s\n' \
                 'Input alphabet: %s\n' \
                 'Tape alphabet: %s\n' \
                 'Blank symbol: %s\n' \
@@ -239,19 +297,19 @@ if __name__ == '__main__':
 
     hstate = 'H'
     states = set([1,2, hstate])
-    in_alphabet = set(['0','1'])
-    tape_alphabet = set(['0','1','#'])
+    in_alphabet = set([0,1])
+    tape_alphabet = set([0,1,'#'])
     istate = 1
     fstates = set([2])
     blank = '#'
     trans_function = {
-                    (1,'0'): (2,'1', 'R'),
-                    (1,'1'): (2,'0', 'R'),
-                    (2,'0'): (1,'0', 'L'),
-                    (2,'1'): (3,'1', 'R'),
-                    (3,'0'): (hstate,'0', 'N'),
-                    (3,'1'): (hstate,'1', 'N'),
-                    (3,blank): (hstate,blank,'N')
+                    (1,0): (2, 1, 'R'),
+                    (1,1): (2, 0, 'R'),
+                    (2,0): (1, 0, 'L'),
+                    (2,1): (3, 1, 'R'),
+                    (3,0): (hstate, 0, 'N'),
+                    (3,1): (hstate, 1, 'N'),
+                    (3,blank): (hstate, blank,'N')
                 }
 
 
@@ -269,3 +327,16 @@ if __name__ == '__main__':
 
     print 'Turing Machine'
     print tm
+    
+    tape = [1,0,1,0,0,1,0,3]
+    try:
+        tm.setTape(tape)
+    except tmexceptions.InvalidSymbolException as e:
+        print 'Error', e
+        
+    print 'Removing state 3 from the tape'
+        
+    tape = [1,0,1,0,0,1]
+    tm.setTape(tape)
+    for i in xrange(tm.getInternalTapeSize()):
+        print tm.getSymbolAt(i),
