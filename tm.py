@@ -22,6 +22,7 @@ class TuringMachine:
     MOVE_RIGHT = 1
     MOVE_LEFT = 2
     NON_MOVEMENT = 3
+    HEAD_MOVEMENTS = frozenset((MOVE_LEFT, MOVE_RIGHT, NON_MOVEMENT))
 
     #
     #
@@ -369,7 +370,7 @@ class TuringMachine:
         if not self._in_alphabet.issubset(self._tape_alphabet):
             raise Exception('Input alphabet is not subset of tape alphabet')
 
-        if blank not in self._tape_alphabet:
+        if self._blank not in self._tape_alphabet:
             raise Exception('Blank symbol is not into the tape alphabet')
 
         if self._istate not in self._states:
@@ -425,7 +426,7 @@ if __name__ == '__main__':
 
     print 'Turing Machine class Test'
 
-    hstate = 'H'
+    hstate = 'HALT'
     states = set([1,2, hstate])
     in_alphabet = set([0,1])
     tape_alphabet = set([0,1,'#'])
