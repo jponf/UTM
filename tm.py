@@ -194,6 +194,9 @@ class TuringMachine:
         filled with blanks
         
         If tape contains an invalid symbol raises an InvalidSymbolException
+        
+        WARNING: 
+            It is recomended that the tape symbols are inmutable types
         """
         
         for s in tape:
@@ -359,7 +362,7 @@ if __name__ == '__main__':
     trans_function = {
                     (1,0): (2, 1, 'R'),
                     (1,1): (2, 0, 'R'),
-                    (2,0): (1, 0, 'L'),
+                    (2,0): (1, 0, 'N'),
                     (2,1): (3, 1, 'R'),
                     (3,0): (hstate, 0, 'N'),
                     (3,1): (hstate, 1, 'N'),
@@ -382,6 +385,7 @@ if __name__ == '__main__':
     print 'Turing Machine'
     print tm
     
+    print '\nSet Tape'
     tape = [1,0,1,0,0,1,0,3]
     try:
         tm.setTape(tape)
@@ -389,12 +393,29 @@ if __name__ == '__main__':
         print 'Error', e
         
     print 'Removing state 3 from the tape'
-        
-    tape = [1,0,1,0,0,1]
+    
+    tape = [1,0,0,0,0,1]
     tm.setTape(tape)
     for i in tm.getTapeIterator():
         print i,
     print
 
+    print '\nCheck words'
     print 'Is word 1010 accepted?', tm.isWordAccepted([1,0,1,0])
-    print 'Is word 0 accepted?', tm.isWordAccepted([0])
+    print 'Is word 1000 accepted?', tm.isWordAccepted([1, 0, 0, 0])
+    
+    print '\nTape after checks (Should be the old set values)'
+    for i in tm.getTapeIterator():
+        print i,
+    print
+
+    print '\nRunning tm until halt state or undefined transition'
+    print 'Run status code:', tm.run()
+    print 'Expected tape symbols:', 0, 1, 1, 1, 1, 1, blank
+    print ' Tape after execution:',
+    for i in tm.getTapeIterator():
+        print i,
+    print
+    
+    
+    
