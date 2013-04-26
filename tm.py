@@ -73,6 +73,8 @@ class TuringMachine:
             
             - If it's at Halt state raises HaltStateException
             - If tape is unset raises UnsetTapeException
+            - If there are no specified transition for the current state and
+              symbol, raises UnknownTransitionException
         """
         if self.isAtHaltState():
             raise tmexceptions.HaltStateException('Current state is halt state')
@@ -111,21 +113,26 @@ class TuringMachine:
         Return values:
             0 - Ends by halt state
             1 - Ends by max steps limit
+            2 - Ends by unknown transition
         """
-        if max_steps:
-            try:
-
-                for i in xrange(max_steps):
+        try:
+            if max_steps:
+                try:
+    
+                    for i in xrange(max_steps):
+                        self.step()
+                    return  1
+                except tmexceptions.HaltStateException:
+                    return 0
+                    
+            else:
+                
+                while not self.isAtHaltState():
                     self.step()
-                return  1
-            except tmexceptions.HaltStateException:
                 return 0
                 
-        else:
-            
-            while not self.isAtHaltState():
-                self.step()
-            return 0
+        except tmexceptions.UnknownTransitionException:
+            return 2
 
     #
     #
@@ -165,6 +172,14 @@ class TuringMachine:
         Returns the current head position
         """
         return self.head
+        
+    #
+    #
+    def getTapeIterator(self):
+        """
+        Returns an iterator of the internal tape
+        """
+        return iter(self.tape)
 
     #
     #
@@ -205,7 +220,15 @@ class TuringMachine:
         """
         Returns true only if current state is the halt state
         """
-        return self.curr_state == self.hstate
+        return self.cur_state == self.hstate
+        
+    #
+    #
+    def isAtFinalState(self):
+        """
+        Returns true only if current state is a final state
+        """
+        return self.cur_state in self.fstates
 
     #
     #
@@ -214,6 +237,35 @@ class TuringMachine:
         Returns true only if tape is set        
         """
         return self.tape != None
+
+    #
+    #
+    def isWordAccepted(self, word, max_steps=None):
+        """
+        Return values are:
+            True - Ends by halt state or undefined transition at a final state
+            False - Ends by halt state or undefined transition at a non final state
+            None - Ends by max_steps
+        """
+        
+        old_tape = self.tape
+        old_state = self.cur_state
+        old_head = self.head
+        
+        self.setTape(word)
+        end_cond = self.run(max_steps)
+        self.tape = old_tape
+        
+        if end_cond == 0 or end_cond == 2:        
+            accepted = self.isAtFinalState()
+        else:
+            accepted = None
+        
+        self.tape = old_tape
+        self.cur_state = old_state
+        self.head = old_head
+        
+        return accepted
 
     #
     #
@@ -295,6 +347,8 @@ class TuringMachine:
 # Test class
 if __name__ == '__main__':
 
+    print 'Turing Machine class Test'
+
     hstate = 'H'
     states = set([1,2, hstate])
     in_alphabet = set([0,1])
@@ -338,5 +392,9 @@ if __name__ == '__main__':
         
     tape = [1,0,1,0,0,1]
     tm.setTape(tape)
-    for i in xrange(tm.getInternalTapeSize()):
-        print tm.getSymbolAt(i),
+    for i in tm.getTapeIterator():
+        print i,
+    print
+
+    print 'Is word 1010 accepted?', tm.isWordAccepted([1,0,1,0])
+    print 'Is word 0 accepted?', tm.isWordAccepted([0])
