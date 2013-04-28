@@ -17,18 +17,32 @@ class TuringMachineBuilder:
         blank symbol.
         
         haltstate takes as default value 'HALT'
-        blnak takes as default value '#'
+        blnak takes as default value '#' and must be one char length
         """
         self._states = set()
         self._in_alphabet = set()
         self._trans_function = {}
         self._istate = None
         self._fstates = set()
-        self._blank = blank
-        self._haltstate = haltstate
         
-        # It can be added at the creation type becaus is treated as an iterable
-        self._states.add(haltstate)
+        self._blank = None
+        self._haltstate = None
+        self.setBlankSymbol(blank)
+        self.setHaltState(haltstate)
+        
+    #
+    #
+    def clean(self):
+        """
+        Clear all the previous stored data
+        """
+        self._states = set()
+        self._in_alphabet = set()
+        self._trans_function = {}
+        self._istate = None
+        self._fstates = set()
+        
+        self._states.add(self._haltstate)
         
     #
     #    
@@ -46,10 +60,16 @@ class TuringMachineBuilder:
         - new_symbol: something that represents a symbol, must be hashable
         - movement: TuringMachine.MOVE_LEFT or TuringMachine.MOVE_RIGHT or 
                     TuringMachine.NON_MOVEMENT
+                    
+        Raise Exception if symbols have more than one char length
         """
         
         if movement not in TuringMachine.HEAD_MOVEMENTS:        
             raise Exception('Invalid movement')
+        
+        if (hasattr(symbol, 'len') and len(symbol) > 1) or \
+            (hasattr(new_symbol, 'len') and len(new_symbol) > 1):
+            raise Exception('Symbol length > 1')
         
         if state not in self._states:
             self._states.add(state)
@@ -86,6 +106,56 @@ class TuringMachineBuilder:
             self._states.add(state)
         self._istate = state
         
+     
+    #
+    #
+    def hasInitialState(self):
+        """
+        Returns True if the initial state was specified on a previous call
+        to setInitialState
+        """
+        return self._istate != None
+        
+        
+    #
+    #
+    def setBlankSymbol(self, blank_sym):
+        """
+        Specifies a new blank symbol
+            - The blank symbol must be one char length
+            
+        Raise Exception if blank_sym has more than one char length
+        """
+        if not blank_sym or len(blank_sym) > 1:
+            raise Exception('Symbol must be one char length')
+            
+        self._blank = blank_sym
+        
+    #
+    #
+    def setHaltState(self, haltstate):
+        """
+        Specifies a new halt state
+            - It must be done before:
+                - Adding any new state
+                - Adding a transition
+                - Setting an Initial or Final states
+        """
+        
+        if len(self._states) > 1 or len(self._trans_function) > 0 or \
+            len(self._fstates) > 0 or self._istate != None:
+                raise Exception('The halt state can only be redefined '
+                                'with a clean instance. Call clean() before '
+                                'call this method')
+        if self._states:
+            self._states = set()                        
+        self._haltstate = haltstate
+        self._states.add(self._haltstate)                
+        
+        
+        
+        
+    
     #
     #
     def create(self):
@@ -97,7 +167,7 @@ class TuringMachineBuilder:
         
         At this point the tape_alphabet is set to be: in_alphabet U {blank}
         """
-        if self._istate == None:
+        if not self.hasInitialState():
             raise Exception('It is necessary to specify an initial state')
         
         
