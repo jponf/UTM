@@ -86,7 +86,7 @@ class TuringMachine:
               symbol, raises UnknownTransitionException
         """
         if self.isAtHaltState():
-            raise tmexceptions.HaltStateException('Current state is halt state')
+            raise tmexceptions.HaltStateException('The current state is halt state')
         if self._tape == None:
             raise tmexceptions.UnsetTapeException(
                 'Tape must be set before perform an step')
@@ -171,10 +171,10 @@ class TuringMachine:
         """
         Returns the symbol at the specified position
         
-        The internal symbols goes from 0 to getInternalTapeSize()
+        The internal symbols goes from 0 to getInternalTapeSize() - 1
         for any other position out of this range the blank symbol is returned
         """
-        if pos < 0 or pos > len(self._tape):
+        if pos < 0 or pos >= len(self._tape):
             return self._blank
             
         return self._tape[pos]

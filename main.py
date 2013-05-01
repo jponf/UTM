@@ -3,6 +3,8 @@
 
 import sys
 import tmparser
+import tmexceptions
+import tm
 
 from PyQt4 import QtGui, QtCore
 
@@ -69,7 +71,14 @@ class GUI(QtGui.QWidget):
     def installHandlers(self):
         self.set_tm_btn.clicked.connect(self.onSetTuringMachineClicked)
         self.set_tape_btn.clicked.connect(self.onSetTapeClicked)
+        self.run_step_btn.clicked.connect(self.onRunStepClicked)
+        self.run_all_btn.clicked.connect(self.onRunUntilHaltClicked)        
         
+        
+    #
+    # QtGui event handlers
+    #
+    
     #
     #
     def onSetTuringMachineClicked(self):
@@ -94,14 +103,53 @@ class GUI(QtGui.QWidget):
     #
     #
     def onSetTapeClicked(self):
-        tapestr = str(self.src_textbox.toPlainText())
+        tapestr = str(self.tape_textbox.toPlainText())
         if self.turing_machine != None:
             self.turing_machine.setTape(tapestr)
+        else:
+            self.log_textbox.setTextColor(GUI.QCOLOR_RED)
+            self.log_textbox.append('Set the turing machine before set the tape')
             
     #
     #
-    #def redrawTape(self, headpos):
-        
+    def onRunStepClicked(self):
+        try:
+            self.turing_machine.step()
+            
+        except tmexceptions.HaltStateException, e:
+            self.log_textbox.setTextColor(GUI.QCOLOR_RED)
+            self.log_textbox.append(str(e))
+            
+        except tmexceptions.UnsetTapeException, e:
+            self.log_textbox.setTextColor(GUI.QCOLOR_RED)
+            self.log_textbox.append(str(e))
+            
+        except tmexceptions.UnknownTransitionException, e:
+            self.log_textbox.setTextColor(GUI.QCOLOR_RED)
+            self.log_textbox.append(str(e))
+            
+    #
+    #            
+    def onRunUntilHaltClicked(self):
+        if self.turing_machine.isAtHaltState():
+            self.log_textbox.setTextColor(GUI.QCOLOR_RED)
+            self.log_textbox.append('The current state is halt state')
+        else:
+            self.log_textbox.setTextColor(GUI.QCOLOR_BLK)
+            self.log_textbox.append('---------- Run Until Halt ----------')
+            
+            try:
+                while not self.turing_machine.isAtHaltState():
+                    self.turing_machine.step()
+                
+            except tmexceptions.UnsetTapeException, e:
+                self.log_textbox.setTextColor(GUI.QCOLOR_RED)
+                self.log_textbox.append(str(e))
+                
+            except tmexceptions.UnknownTransitionException, e:
+                self.log_textbox.setTextColor(GUI.QCOLOR_RED)
+                self.log_textbox.append(str(e))
+                    
     #
     # Turing Machine observer methods
     #
@@ -114,17 +162,27 @@ class GUI(QtGui.QWidget):
     #
     #
     def onStepEnd(self, new_state, writed_symbol, movement):
-        pass
+        self.log_textbox.setTextColor(GUI.QCOLOR_BLK)
+        self.log_textbox.append('Writed Symbol: ' + str(writed_symbol) )
+        
+        if movement == tm.TuringMachine.MOVE_LEFT:            
+            self.log_textbox.append('Head moved to the left')
+        elif movement == tm.TuringMachine.MOVE_RIGHT:
+            self.log_textbox.append('Head moved to the right')            
+        else:
+            self.log_textbox.append('Head remains at the same position')
+        
+        self.log_textbox.append('Current state: ' + str(new_state))
     
     #
     #
     def onTapeChanged(self, head_pos):
-        pass
+        self._redrawTape(head_pos)
     
     #
     #
     def onHeadMoved(self, head_pos, old_head_pos):
-        pass
+        self._redrawTape(head_pos)
 
         
     #
@@ -161,6 +219,7 @@ class GUI(QtGui.QWidget):
         for txbx in tptx:
             txbx.setReadOnly(True)
             txbx.setFocusPolicy(QtCore.Qt.NoFocus)
+            txbx.setAlignment(QtCore.Qt.AlignHCenter)
         tptx[GUI.TAPE_HEAD].setStyleSheet("QLineEdit { border: 2px solid gray; }")
         return tptx
         
@@ -179,16 +238,19 @@ class GUI(QtGui.QWidget):
         self.ctrl_hbox = QtGui.QHBoxLayout()
         
         # Add source text box and load/save buttons
+        ctrl_llabel = QtGui.QLabel("TM Source Code", self)
         self.src_textbox = QtGui.QPlainTextEdit(self)
         self.src_load_btn = QtGui.QPushButton('Load', self)
         self.src_save_btn = QtGui.QPushButton('Save', self)
         
         self.ctrl_lvbox = QtGui.QVBoxLayout()
+        self.ctrl_lvbox.addWidget(ctrl_llabel, 0, QtCore.Qt.AlignCenter)
         self.ctrl_lvbox.addWidget(self.src_textbox)
         self.ctrl_lvbox.addWidget(self.src_load_btn)
         self.ctrl_lvbox.addWidget(self.src_save_btn)
         
         # Add control buttons
+        ctrl_rlabel = QtGui.QLabel("Tape's Initial Value", self)
         self.tape_textbox = QtGui.QPlainTextEdit(self)
         self.set_tm_btn = QtGui.QPushButton('Set TM', self)
         self.set_tape_btn = QtGui.QPushButton('Set Tape', self)
@@ -196,6 +258,7 @@ class GUI(QtGui.QWidget):
         self.run_all_btn = QtGui.QPushButton('Run Until Halt', self)
         
         self.ctrl_rvbox = QtGui.QVBoxLayout()
+        self.ctrl_rvbox.addWidget(ctrl_rlabel, 0, QtCore.Qt.AlignCenter)
         self.ctrl_rvbox.addWidget(self.tape_textbox)
         self.ctrl_rvbox.addWidget(self.set_tm_btn)
         self.ctrl_rvbox.addWidget(self.set_tape_btn)
@@ -207,6 +270,23 @@ class GUI(QtGui.QWidget):
         self.ctrl_hbox.addSpacing(GUI.HSPACING)
         self.ctrl_hbox.addLayout(self.ctrl_rvbox, 1)
         self.main_vbox.addLayout(self.ctrl_hbox, 4)
+        
+    #
+    #
+    def _redrawTape(self, head_pos):
+        sym = self.turing_machine.getSymbolAt(head_pos)
+        self.tape_textboxes[GUI.TAPE_HEAD].setText(str(sym))
+        
+        for i in xrange(1, GUI.TAPE_HEAD + 1):
+            txtbx_index = GUI.TAPE_HEAD - i
+            tape_index = head_pos - i
+            self.tape_textboxes[txtbx_index].setText(
+                            str(self.turing_machine.getSymbolAt(tape_index)) )
+                                
+        for inc, i in enumerate(xrange(GUI.TAPE_HEAD + 1, GUI.TAPE_SIZE)):
+            tape_index = head_pos + inc + 1
+            self.tape_textboxes[i].setText(
+                            str(self.turing_machine.getSymbolAt(tape_index)) )
 #
 #
 if __name__ == '__main__':    
