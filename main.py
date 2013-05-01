@@ -1,10 +1,13 @@
 #!/usr/vin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import sys
+
+import tm
 import tmparser
 import tmexceptions
-import tm
+
 
 from PyQt4 import QtGui, QtCore
 
@@ -72,7 +75,9 @@ class GUI(QtGui.QWidget):
         self.set_tm_btn.clicked.connect(self.onSetTuringMachineClicked)
         self.set_tape_btn.clicked.connect(self.onSetTapeClicked)
         self.run_step_btn.clicked.connect(self.onRunStepClicked)
-        self.run_all_btn.clicked.connect(self.onRunUntilHaltClicked)        
+        self.run_all_btn.clicked.connect(self.onRunUntilHaltClicked)  
+        self.src_load_btn.clicked.connect(self.onLoadClicked)
+        self.src_save_btn.clicked.connect(self.onSaveClicked)
         
         
     #
@@ -82,6 +87,7 @@ class GUI(QtGui.QWidget):
     #
     #
     def onSetTuringMachineClicked(self):
+        
         tmstr = str(self.src_textbox.toPlainText())
         try:
             self.parser.clean()
@@ -113,6 +119,7 @@ class GUI(QtGui.QWidget):
     #
     #
     def onRunStepClicked(self):
+        
         try:
             self.turing_machine.step()
             
@@ -131,9 +138,11 @@ class GUI(QtGui.QWidget):
     #
     #            
     def onRunUntilHaltClicked(self):
+        
         if self.turing_machine.isAtHaltState():
             self.log_textbox.setTextColor(GUI.QCOLOR_RED)
             self.log_textbox.append('The current state is halt state')
+            
         else:
             self.log_textbox.setTextColor(GUI.QCOLOR_BLK)
             self.log_textbox.append('---------- Run Until Halt ----------')
@@ -149,7 +158,33 @@ class GUI(QtGui.QWidget):
             except tmexceptions.UnknownTransitionException, e:
                 self.log_textbox.setTextColor(GUI.QCOLOR_RED)
                 self.log_textbox.append(str(e))
-                    
+                
+    #
+    #
+    def onLoadClicked(self):
+        
+        fname = QtGui.QFileDialog.getOpenFileName(self, 'Load file',
+                                                  os.path.expanduser('~'))
+                                                  
+        if fname:
+            f = open(fname, 'r')
+            fstr = f.read()
+            self.src_textbox.setPlainText(fstr)
+            f.close()
+            # TODO add notification on log_textbox
+            
+    #
+    #
+    def onSaveClicked(self):
+        
+        fname = QtGui.QFileDialog.getSaveFileName(self, 'Save file',
+                                                  os.path.expanduser('~'))
+                                                  
+        if fname:
+            f = open(fname, 'w')
+            fstr = str(self.src_textbox.toPlainText())
+            f.write(fstr)
+            f.close()
     #
     # Turing Machine observer methods
     #
