@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import copy
+import inspect
 import tmexceptions
 
 
@@ -100,6 +101,8 @@ class TuringMachine:
             self._tape[self._head] = sym
             self._cur_state = state
             
+            prev_head_pos = self._head
+            
             if movement == TuringMachine.MOVE_LEFT:
                 if self._head == 0:
                     self._tape.insert(0, self._blank)
@@ -109,10 +112,14 @@ class TuringMachine:
                 if self._head == len(self._tape):
                     self._tape.append(self._blank)                
         
+            # Notify observers
             for obs in self._observers:
                 obs.onStepEnd(state, sym, movement)
                 
-                self._nexecuted_steps += 1        
+                if prev_head_pos != self._head:
+                    obs.onHeadMoved(self._head, prev_head_pos)
+                
+            self._nexecuted_steps += 1        
         
         except KeyError:
             raise tmexceptions.UnknownTransitionException(
@@ -295,6 +302,9 @@ class TuringMachine:
         else:
             self._tape = list(tape)
             self._head = head_pos
+            
+        for obs in self._observers:
+            obs.onTapeChanged(head_pos)
 
 
     #
@@ -306,21 +316,48 @@ class TuringMachine:
         Observers must implement the following methods:
             
             onStepStart(current_state, current_tape_symbol)
+                Called at the beggining of a new state, after check if exists
+                a transition for the current (state, symbol)
+                
                 - current_state is the state after perform the transition
                 - current_tape_symbol is the symbol at the head position
                 
-            onStepEnd(new_state, new_symbol, movement)
+            onStepEnd(new_state, writed_symbol, movement)
+                Called when an steps end succesfully
+                
                 - new_state is the state after perform the transition
-                - new_symbol is the symbol writed to the tape at the previous
-                             head position
+                - writed_symbol is the symbol writed to the tape at the previous head position
                 - movement is the head move direction after write new_symbol
+                
+            onTapeChanged(head_pos)
+                Called after a succesful call to setTape
+                
+                - head_pos is the specified position on the call to setTape
+                
+            onHeadMoved(head_pos, old_head_pos)
+                Called when the head position changes
+                
+                - head_pos is the actual head position (after movement)
+                - old_head_pos is the previous head position (before movement)
         """
         # Observer must have the following method
-        assert hasattr(observer, 'onStepStart')
-        assert hasattr(observer, 'onStepEnd')
+        if not hasattr(observer, 'onStepStart'): 
+            raise Exception('Observer must have an onStepStart method')
+        if not hasattr(observer, 'onStepEnd'):
+            raise Exception('Observer must have an onStepEnd method')
+        if not hasattr(observer, 'onTapeChanged'):
+            raise Exception('Observer must have an onTapeChanged method')
+        if not hasattr(observer, 'onHeadMoved'):
+            raise Exception('Observer must have an onHeadMoved method')
         # onStepStart and onStepEnd must accept the following amount of parameters
-        assert observer.onStepStart.func_code.co_argcount == 2
-        assert observer.onStepEnd.func_code.co_argcount == 3
+        if not _getNumArguments(observer.onStepStart) == 2:
+            raise Exception('Observer onStepStart method must have 2 parameters')    
+        if not _getNumArguments(observer.onStepEnd) == 3:
+            raise Exception('Observer onStepEnd method must have 3 parameters')    
+        if not _getNumArguments(observer.onTapeChanged) == 1:
+            raise Exception('Observer onTapeChanged method must have 1 parameters')    
+        if not _getNumArguments(observer.onHeadMoved) == 2:
+            raise Exception('Observer onHeadMoved method must have 2 parameters')    
         
         if observer not in self._observers:
             self._observers.append(observer)
@@ -419,6 +456,24 @@ class TuringMachine:
                     str(self._fstates), str(self._hstate), 
                     str(self._trans_function)
                     )
+
+#
+#                    
+def _getNumArguments(func):
+    """
+    Return the number of arguments of the specified function
+    
+    If the functions belongs to an instance of any class the self parameter
+    is ignored
+    """
+    argspec = inspect.getargspec(func)
+    args = argspec[0]
+    
+    if args.index('self') == 0:
+        return len(args) - 1
+        
+    return len(args)
+    
 
 
 # Test class
