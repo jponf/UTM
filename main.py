@@ -30,7 +30,7 @@ def main():
 #
 class GUI(QtGui.QWidget):
     
-    TAPE_SIZE = 29
+    TAPE_SIZE = 31
     TAPE_HEAD = int(round(TAPE_SIZE / 2))
     DEF_WIDTH = 800
     DEF_HEIGHT = 600
@@ -95,16 +95,13 @@ class GUI(QtGui.QWidget):
             self.turing_machine = self.parser.create()
             self.turing_machine.attachObserver(self)
             
-            self.log_textbox.setTextColor(GUI.QCOLOR_BLK)
-            self.log_textbox.append('Turing machine set')
-            self.log_textbox.append('Current state: ' + 
+            self._printInfoLog('Turing machine set')
+            self._printInfoLog('Current state: ' + 
                                 str(self.turing_machine.getCurrentState()))
         except Exception, e:
-            self.log_textbox.setTextColor(GUI.QCOLOR_RED)
-            self.log_textbox.append(str(e))
+            self._printErrorLog(str(e))
         except AssertionError, e:
-            self.log_textbox.setTextColor(GUI.QCOLOR_RED)
-            self.log_textbox.append(str(e))
+            self._printErrorLog(str(e))
             
     #
     #
@@ -113,8 +110,7 @@ class GUI(QtGui.QWidget):
         if self.turing_machine != None:
             self.turing_machine.setTape(tapestr)
         else:
-            self.log_textbox.setTextColor(GUI.QCOLOR_RED)
-            self.log_textbox.append('Set the turing machine before set the tape')
+            self._printErrorLog('Set the turing machine before set the tape')
             
     #
     #
@@ -124,40 +120,33 @@ class GUI(QtGui.QWidget):
             self.turing_machine.step()
             
         except tmexceptions.HaltStateException, e:
-            self.log_textbox.setTextColor(GUI.QCOLOR_RED)
-            self.log_textbox.append(str(e))
+            self._printErrorLogstr(e)
             
         except tmexceptions.UnsetTapeException, e:
-            self.log_textbox.setTextColor(GUI.QCOLOR_RED)
-            self.log_textbox.append(str(e))
+            self._printErrorLog(str(e))
             
         except tmexceptions.UnknownTransitionException, e:
-            self.log_textbox.setTextColor(GUI.QCOLOR_RED)
-            self.log_textbox.append(str(e))
+            self._printErrorLog(str(e))
             
     #
     #            
     def onRunUntilHaltClicked(self):
         
         if self.turing_machine.isAtHaltState():
-            self.log_textbox.setTextColor(GUI.QCOLOR_RED)
-            self.log_textbox.append('The current state is halt state')
+            self._printErrorLog('The current state is halt state')
             
         else:
-            self.log_textbox.setTextColor(GUI.QCOLOR_BLK)
-            self.log_textbox.append('---------- Run Until Halt ----------')
+            self._printInfoLog('---------- Run Until Halt ----------')
             
             try:
                 while not self.turing_machine.isAtHaltState():
                     self.turing_machine.step()
                 
             except tmexceptions.UnsetTapeException, e:
-                self.log_textbox.setTextColor(GUI.QCOLOR_RED)
-                self.log_textbox.append(str(e))
+                self._printErrorLog(str(e))
                 
             except tmexceptions.UnknownTransitionException, e:
-                self.log_textbox.setTextColor(GUI.QCOLOR_RED)
-                self.log_textbox.append(str(e))
+                self._printErrorLog(str(e))
                 
     #
     #
@@ -171,8 +160,8 @@ class GUI(QtGui.QWidget):
             fstr = f.read()
             self.src_textbox.setPlainText(fstr)
             f.close()
-            # TODO add notification on log_textbox
             
+            self._printInfoLog('Loaded file: %s' % fname)            
     #
     #
     def onSaveClicked(self):
@@ -185,6 +174,9 @@ class GUI(QtGui.QWidget):
             fstr = str(self.src_textbox.toPlainText())
             f.write(fstr)
             f.close()
+            
+            self._printInfoLog('Saved file: %s' % fname)
+            
     #
     # Turing Machine observer methods
     #
@@ -197,17 +189,16 @@ class GUI(QtGui.QWidget):
     #
     #
     def onStepEnd(self, new_state, writed_symbol, movement):
-        self.log_textbox.setTextColor(GUI.QCOLOR_BLK)
-        self.log_textbox.append('Writed Symbol: ' + str(writed_symbol) )
+        self._printInfoLog('Writed Symbol: ' + str(writed_symbol) )
         
         if movement == tm.TuringMachine.MOVE_LEFT:            
-            self.log_textbox.append('Head moved to the left')
+            self._printInfoLog('Head moved to the left')
         elif movement == tm.TuringMachine.MOVE_RIGHT:
-            self.log_textbox.append('Head moved to the right')            
+            self._printInfoLog('Head moved to the right')            
         else:
-            self.log_textbox.append('Head remains at the same position')
+            self._printInfoLog('Head remains at the same position')
         
-        self.log_textbox.append('Current state: ' + str(new_state))
+        self._printInfoLog('Current state: ' + str(new_state))
     
     #
     #
@@ -322,6 +313,26 @@ class GUI(QtGui.QWidget):
             tape_index = head_pos + inc + 1
             self.tape_textboxes[i].setText(
                             str(self.turing_machine.getSymbolAt(tape_index)) )
+    
+    #
+    #
+    def _printErrorLog(self, error):
+        """
+        Prints a message on the log_textbox
+        Text Color: RED
+        """
+        self.log_textbox.setTextColor(GUI.QCOLOR_RED)
+        self.log_textbox.append(error)
+    
+    #
+    #        
+    def _printInfoLog(self, msg):
+        """
+        Prints a message on the log_textbox
+        Text Color: BLACK
+        """
+        self.log_textbox.setTextColor(GUI.QCOLOR_BLK)
+        self.log_textbox.append(msg)
 #
 #
 if __name__ == '__main__':    
