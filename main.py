@@ -1,4 +1,4 @@
-#!/usr/vin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import os
@@ -100,8 +100,6 @@ class GUI(QtGui.QWidget):
                                 str(self.turing_machine.getCurrentState()))
         except Exception, e:
             self._printErrorLog(str(e))
-        except AssertionError, e:
-            self._printErrorLog(str(e))
             
     #
     #
@@ -120,7 +118,7 @@ class GUI(QtGui.QWidget):
             self.turing_machine.step()
             
         except tmexceptions.HaltStateException, e:
-            self._printErrorLogstr(e)
+            self._printErrorLog(str(e))
             
         except tmexceptions.UnsetTapeException, e:
             self._printErrorLog(str(e))
@@ -184,11 +182,14 @@ class GUI(QtGui.QWidget):
     #
     #
     def onStepStart(self, current_state, current_tape_symbol):
-        pass
-    
+        self._printInfoLog('+++++++++++++++++++++++++++++++++++++++++++++++')
+        self._printInfoLog('Started step at state "%s" with tape symbol "%s"'
+                            % ( str(current_state), str(current_tape_symbol)))
     #
     #
     def onStepEnd(self, new_state, writed_symbol, movement):
+        self._printInfoLog('-----------------------------------------------')
+        
         self._printInfoLog('Writed Symbol: ' + str(writed_symbol) )
         
         if movement == tm.TuringMachine.MOVE_LEFT:            
@@ -198,7 +199,8 @@ class GUI(QtGui.QWidget):
         else:
             self._printInfoLog('Head remains at the same position')
         
-        self._printInfoLog('Current state: ' + str(new_state))
+        self._printInfoLog('Current state: ' + str(new_state) + 
+            (' (FINAL)' if self.turing_machine.isAtFinalState() else '') ) 
     
     #
     #

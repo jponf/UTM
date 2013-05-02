@@ -11,7 +11,7 @@ class TuringMachineBuilder:
     blank symbol to '#'
     """
     
-    def __init__(self, haltstate='HALT', blank='#'):
+    def __init__(self):
         """
         Initialize a new TuringMachineBuilder with the specified haltstate and
         blank symbol.
@@ -27,8 +27,6 @@ class TuringMachineBuilder:
         
         self._blank = None
         self._haltstate = None
-        self.setBlankSymbol(blank)
-        self.setHaltState(haltstate)
         
     #
     #
@@ -42,7 +40,8 @@ class TuringMachineBuilder:
         self._istate = None
         self._fstates = set()
         
-        self._states.add(self._haltstate)
+        self._blank = None
+        self._haltstate = None
         
     #
     #    
@@ -116,6 +115,24 @@ class TuringMachineBuilder:
         """
         return self._istate != None
         
+    #
+    #
+    def hasHaltState(self):
+        """
+        Returns True if the halt state was specified on a preivous call to
+        setHaltState
+        """
+        return self._haltstate != None
+        
+    #
+    #
+    def hasBlankSymbol(self):
+        """
+        Returns True if the halt state was specified on a preivous call to
+        setBlankSymbol
+        """
+        return self._blank != None
+        
         
     #
     #
@@ -136,25 +153,22 @@ class TuringMachineBuilder:
     def setHaltState(self, haltstate):
         """
         Specifies a new halt state
-            - It must be done before:
-                - Adding any new state
-                - Adding a transition
-                - Setting an Initial or Final states
         """
         
-        if len(self._states) > 1 or len(self._trans_function) > 0 or \
-            len(self._fstates) > 0 or self._istate != None:
-                raise Exception('The halt state can only be redefined '
-                                'with a clean instance. Call clean() before '
-                                'call this method')
-        if self._states:
-            self._states = set()                        
+        # If there are a previous halt state. Check if it appears in some
+        # transition otherwise delete it from the list of states
+        if self.hasHaltState():
+            old_remains = False
+            for k, v in self._trans_function.iteritems():
+                if k[0] == self._haltstate or v[0] == self._haltstate:
+                    old_remains = True
+                    break
+                
+            if not old_remains:
+                self._states.remove(self._haltstate)
+                     
         self._haltstate = haltstate
         self._states.add(self._haltstate)                
-        
-        
-        
-        
     
     #
     #
@@ -162,13 +176,21 @@ class TuringMachineBuilder:
         """
         Creates a turing machine instance with the collected information.
         
-        If the initial state remains unset when this method is called, will
-        raises an Exception.
+        Raises an Exception if:
+            The initial state remains unset
+            The halt state remains unset
+            The blank symbol remains unset
         
         At this point the tape_alphabet is set to be: in_alphabet U {blank}
         """
         if not self.hasInitialState():
             raise Exception('It is necessary to specify an initial state')
+            
+        if not self.hasBlankSymbol():
+            raise Exception('It is necessary to specify the blank symbol')
+            
+        if not self.hasHaltState():
+            raise Exception('It is necessary to specify the halt state')
         
         
         tape_alphabet = set(self._in_alphabet)
@@ -190,6 +212,9 @@ class TuringMachineBuilder:
 
 if __name__ == '__main__':
     tmb = TuringMachineBuilder()
+    
+    tmb.setBlankSymbol('#')
+    tmb.setHaltState('HALT')
     
     tmb.addTransition(1, 0, 2, 1, TuringMachine.MOVE_RIGHT)
     tmb.addTransition(1, 1, 2, 0, TuringMachine.MOVE_RIGHT)

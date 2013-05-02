@@ -50,6 +50,7 @@ class TuringMachineParser:
                                           TuringMachineParser.MOVE_RIGHT,
                                           TuringMachineParser.NON_MOVEMENT)
                                         )
+                                        
                                          
     #
     #
@@ -126,7 +127,10 @@ class TuringMachineParser:
         returns False
         """
         mbs = self._blank_symbol_re.match(data)
-        if mbs:            
+        if mbs:   
+            if self._builder.hasBlankSymbol():
+                raise Exception('Blank symbol can only be defined once')                            
+            
             self._builder.setBlankSymbol( mbs.group('symbol') )
             return True
             
@@ -138,9 +142,15 @@ class TuringMachineParser:
         """
         Returns True if the given data is a halt state expresion, otherwise
         returns False
+        
+        Throws
+            Exception if Halt is already defined or if the builder fails when setting the halt state
         """
         mhs = self._halt_state_re.match(data)                    
         if mhs:
+            if self._builder.hasHaltState():
+                raise Exception('Halt state can only be defined once')
+            
             self._builder.setHaltState( mhs.group('state') )
             return True
             
@@ -223,7 +233,7 @@ class TuringMachineParser:
             try:
                 self.parseLine(data)
             except Exception as e:
-                raise Exception('Line %d, %s' % (line, e.message))
+                raise Exception('Line %d, %s' % (line+1, e.message))
     
 #
 # Test                    
