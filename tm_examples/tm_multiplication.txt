@@ -5,7 +5,7 @@
 %       Where # is the blank symbol and the factors are expressed
 %       as a sequence of ones ( 3 = 111 )
 %
-%    For example 4 x 3 will be represented as:
+%    For example 4 x 3 is represented as:
 %           #1111#111
 
 HALT HALT
