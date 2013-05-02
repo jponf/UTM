@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="164.22"
+   height="154.77"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="icon.svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.979899"
+     inkscape:cx="121.79476"
+     inkscape:cy="85.118558"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:snap-object-midpoints="false"
+     inkscape:window-width="800"
+     inkscape:window-height="848"
+     inkscape:window-x="801"
+     inkscape:window-y="24"
+     inkscape:window-maximized="0"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     showguides="true"
+     inkscape:guide-bbox="true" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-128.87653,-117.73989)">
+    <text
+       xml:space="preserve"
+       style="font-size:80px;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Century Schoolbook L;-inkscape-font-specification:Century Schoolbook L Medium"
+       x="215.86659"
+       y="227.3445"
+       id="text3076"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="215.86659"
+         y="227.3445"
+         id="tspan3078"><tspan
+           x="215.86659"
+           y="227.3445"
+           style="text-align:center;text-anchor:middle;fill:#000000;font-family:Century Schoolbook L;-inkscape-font-specification:Century Schoolbook L Medium"
+           id="tspan3080">M</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:144px;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#800000;fill-opacity:1;stroke:none;font-family:Century Schoolbook L;-inkscape-font-specification:Century Schoolbook L Medium"
+       x="216.10706"
+       y="249.43835"
+       id="text3070"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="216.10706"
+         y="249.43835"
+         id="tspan3072"><tspan
+           x="216.10706"
+           y="249.43835"
+           style="fill:#ff6600"
+           id="tspan3074">T</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:210px;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#800000;fill-opacity:1;stroke:none;font-family:Century Schoolbook L;-inkscape-font-specification:Century Schoolbook L Medium"
+       x="210.82411"
+       y="269.35989"
+       id="text3064"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="210.82411"
+         y="269.35989"
+         id="tspan3066"><tspan
+           x="210.82411"
+           y="269.35989"
+           style="writing-mode:lr-tb;fill:#000000"
+           id="tspan3068">U</tspan></tspan></text>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3048"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       transform="translate(67.850281,29.250289)"><flowRegion
+         id="flowRegion3050"><rect
+           id="rect3052"
+           width="18.687822"
+           height="48.992397"
+           x="256.07367"
+           y="72.496735" /></flowRegion><flowPara
+         id="flowPara3054"></flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3056"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       transform="translate(67.850281,29.250289)"><flowRegion
+         id="flowRegion3058"><rect
+           id="rect3060"
+           width="379.31229"
+           height="267.18533"
+           x="-60.104076"
+           y="36.636318" /></flowRegion><flowPara
+         id="flowPara3062"></flowPara></flowRoot>  </g>
+</svg>

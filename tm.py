@@ -106,6 +106,9 @@ class TuringMachine:
             if movement == TuringMachine.MOVE_LEFT:
                 if self._head == 0:
                     self._tape.insert(0, self._blank)
+                else:
+                    self._head -= 1
+                    
                     
             elif movement == TuringMachine.MOVE_RIGHT:
                 self._head += 1
@@ -164,6 +167,22 @@ class TuringMachine:
         Returns the current state (Cpt. Obvious)
         """
         return self._cur_state
+        
+    #
+    #
+    def getBlankSymbol(self):
+        """
+        Returns the blank symbol
+        """
+        return self._blank
+        
+    #
+    #
+    def getHaltState(self):
+        """
+        Returns the halt state
+        """
+        return self._hstate
 
     #
     #

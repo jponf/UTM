@@ -38,6 +38,7 @@ class GUI(QtGui.QWidget):
     VSPACING = 10
     QCOLOR_RED = QtGui.QColor(255,0,0)
     QCOLOR_BLK = QtGui.QColor(0,0,0)
+    ICON = 'icon.png'
     
     #
     #
@@ -53,8 +54,8 @@ class GUI(QtGui.QWidget):
         
         # Configure window
         self.setMinimumSize(GUI.DEF_WIDTH, GUI.DEF_HEIGHT)   
-        #self.setMaximumSize(GUI.DEF_WIDTH, GUI.DEF_HEIGHT)
         self.setWindowTitle(__prog__)
+        self.setWindowIcon(QtGui.QIcon(GUI.ICON))
         
         self.main_vbox = QtGui.QVBoxLayout(self)
         
@@ -98,6 +99,8 @@ class GUI(QtGui.QWidget):
             self._printInfoLog('Turing machine set')
             self._printInfoLog('Current state: ' + 
                                 str(self.turing_machine.getCurrentState()))
+                                
+            sys.stderr.write(str(self.turing_machine) + '\n')
         except Exception, e:
             self._printErrorLog(str(e))
             
@@ -302,19 +305,23 @@ class GUI(QtGui.QWidget):
     #
     #
     def _redrawTape(self, head_pos):
+        blank = self.turing_machine.getBlankSymbol()        
+        
         sym = self.turing_machine.getSymbolAt(head_pos)
-        self.tape_textboxes[GUI.TAPE_HEAD].setText(str(sym))
+        self.tape_textboxes[GUI.TAPE_HEAD].setText('' if sym == blank 
+                                                    else str(sym))
         
         for i in xrange(1, GUI.TAPE_HEAD + 1):
             txtbx_index = GUI.TAPE_HEAD - i
             tape_index = head_pos - i
-            self.tape_textboxes[txtbx_index].setText(
-                            str(self.turing_machine.getSymbolAt(tape_index)) )
+            sym = self.turing_machine.getSymbolAt(tape_index)
+            self.tape_textboxes[txtbx_index].setText('' if sym == blank
+                                                    else str(sym))
                                 
         for inc, i in enumerate(xrange(GUI.TAPE_HEAD + 1, GUI.TAPE_SIZE)):
             tape_index = head_pos + inc + 1
-            self.tape_textboxes[i].setText(
-                            str(self.turing_machine.getSymbolAt(tape_index)) )
+            sym = self.turing_machine.getSymbolAt(tape_index)
+            self.tape_textboxes[i].setText('' if sym == blank else str(sym))
     
     #
     #
