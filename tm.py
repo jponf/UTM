@@ -186,6 +186,14 @@ class TuringMachine:
 
     #
     #
+    def getInitialState(self):
+        """
+        Returns the initial state
+        """
+        return self._istate
+
+    #
+    #
     def getSymbolAt(self, pos):
         """
         Returns the symbol at the specified position
@@ -221,7 +229,10 @@ class TuringMachine:
         """
         Returns an iterator of the internal tape
         """
-        return iter(self._tape)
+        if self._tape:
+            return iter(self._tape)
+        else:
+            raise Exception('Tape must be set before try to get its iterator')
         
     #
     #
@@ -325,6 +336,13 @@ class TuringMachine:
         for obs in self._observers:
             obs.onTapeChanged(head_pos)
 
+    #
+    #
+    def setAtInitialState(self):
+        """
+        Forces the machine state to be the initial state
+        """
+        self._cur_state = self._istate
 
     #
     #

@@ -34,8 +34,8 @@ class GUI(QtGui.QWidget):
     TAPE_HEAD = int(round(TAPE_SIZE / 2))
     DEF_WIDTH = 800
     DEF_HEIGHT = 600
-    HSPACING = 15
-    VSPACING = 10
+    HSPACING = 10
+    VSPACING = 5
     QCOLOR_RED = QtGui.QColor(255,0,0)
     QCOLOR_BLK = QtGui.QColor(0,0,0)
     ICON = 'icon.png'
@@ -79,6 +79,8 @@ class GUI(QtGui.QWidget):
         self.run_all_btn.clicked.connect(self.onRunUntilHaltClicked)  
         self.src_load_btn.clicked.connect(self.onLoadClicked)
         self.src_save_btn.clicked.connect(self.onSaveClicked)
+        self.clear_log_btn.clicked.connect(self.onClearLogClicked)
+        self.print_all_tape_btn.clicked.connect(self.onPrintAllTape)
         
         
     #
@@ -96,7 +98,7 @@ class GUI(QtGui.QWidget):
             self.turing_machine = self.parser.create()
             self.turing_machine.attachObserver(self)
             
-            self._printInfoLog('Turing machine set')
+            self._printInfoLog('Turing machine created')
             self._printInfoLog('Current state: ' + 
                                 str(self.turing_machine.getCurrentState()))
                                 
@@ -110,8 +112,10 @@ class GUI(QtGui.QWidget):
         tapestr = str(self.tape_textbox.toPlainText())
         if self.turing_machine != None:
             self.turing_machine.setTape(tapestr)
+            self.turing_machine.setAtInitialState()
+            self._printInfoLog('Tape value established')
         else:
-            self._printErrorLog('Set the turing machine before set the tape')
+            self._printErrorLog('You have to set the turing machine before set the tape')
             
     #
     #
@@ -177,6 +181,28 @@ class GUI(QtGui.QWidget):
             f.close()
             
             self._printInfoLog('Saved file: %s' % fname)
+            
+    #
+    #
+    def onClearLogClicked(self):
+    
+        self.log_textbox.clear()
+        
+    #
+    #
+    def onPrintAllTape(self):
+        if self.turing_machine:
+            try:
+                tape_value = ' '.join(self.turing_machine.getTapeIterator())
+                self._printInfoLog('***************************************')
+                self._printInfoLog('Tape Values:')
+                self._printInfoLog(tape_value)
+                self._printInfoLog('***************************************')
+            except Exception, e:
+                self._printErrorLog(str(e))
+        else:
+            self._printErrorLog('You have to set the turing machine before print the tape')
+        
             
     #
     # Turing Machine observer methods
@@ -251,16 +277,34 @@ class GUI(QtGui.QWidget):
             txbx.setReadOnly(True)
             txbx.setFocusPolicy(QtCore.Qt.NoFocus)
             txbx.setAlignment(QtCore.Qt.AlignHCenter)
-        tptx[GUI.TAPE_HEAD].setStyleSheet("QLineEdit { border: 2px solid gray; }")
+        tptx[GUI.TAPE_HEAD].setStyleSheet("QLineEdit { border: 2px solid red; }")
         return tptx
         
     #
     #
     def _initLogArea(self):
+        
+        log_vbox = QtGui.QVBoxLayout()
+                
+        # Add log text box
+        log_label = QtGui.QLabel('Activity Log', self)
         self.log_textbox = QtGui.QTextEdit(self)
         self.log_textbox.setReadOnly(True)
+        log_vbox.addWidget(log_label, 0, QtCore.Qt.AlignCenter)
+        log_vbox.addWidget(self.log_textbox)
         
-        self.main_vbox.addWidget(self.log_textbox, 1)
+        # Add some control buttons
+        log_hbox = QtGui.QHBoxLayout() 
+        self.clear_log_btn = QtGui.QPushButton('Clear Log', self)
+        self.print_all_tape_btn = QtGui.QPushButton('Print All Tape', self)
+
+        log_hbox.addWidget(self.print_all_tape_btn)        
+        log_hbox.addWidget(self.clear_log_btn)
+        
+        log_vbox.addLayout(log_hbox)        
+        
+        # Add all the previous stuff to the window layout
+        self.main_vbox.addLayout(log_vbox, 1)
         self.main_vbox.addSpacing(GUI.VSPACING)
         
     #
@@ -300,7 +344,7 @@ class GUI(QtGui.QWidget):
         self.ctrl_hbox.addLayout(self.ctrl_lvbox, 2)
         self.ctrl_hbox.addSpacing(GUI.HSPACING)
         self.ctrl_hbox.addLayout(self.ctrl_rvbox, 1)
-        self.main_vbox.addLayout(self.ctrl_hbox, 4)
+        self.main_vbox.addLayout(self.ctrl_hbox, 2)
         
     #
     #
