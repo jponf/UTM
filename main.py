@@ -7,9 +7,11 @@ import sys
 import tm
 import tmparser
 import tmexceptions
+import highlighters
 
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
+from PyQt4.QtCore import Qt
 
 __prog__='Universal Turing Machine Simulator'
 
@@ -36,8 +38,6 @@ class GUI(QtGui.QWidget):
     DEF_HEIGHT = 600
     HSPACING = 10
     VSPACING = 5
-    QCOLOR_RED = QtGui.QColor(255,0,0)
-    QCOLOR_BLK = QtGui.QColor(0,0,0)
     ICON = 'icon.png'
     
     #
@@ -264,7 +264,7 @@ class GUI(QtGui.QWidget):
 #        self.tape_hbox.addWidget(self.tape_rbutton)
         
         
-        self.main_vbox.addWidget(self.tape_label, 0, QtCore.Qt.AlignCenter)        
+        self.main_vbox.addWidget(self.tape_label, 0, Qt.AlignCenter)        
         self.main_vbox.addLayout(self.tape_hbox, 1)
         self.main_vbox.addSpacing(GUI.VSPACING)
         
@@ -275,8 +275,8 @@ class GUI(QtGui.QWidget):
         tptx = [QtGui.QLineEdit(self) for i in xrange(GUI.TAPE_SIZE)]
         for txbx in tptx:
             txbx.setReadOnly(True)
-            txbx.setFocusPolicy(QtCore.Qt.NoFocus)
-            txbx.setAlignment(QtCore.Qt.AlignHCenter)
+            txbx.setFocusPolicy(Qt.NoFocus)
+            txbx.setAlignment(Qt.AlignHCenter)
         tptx[GUI.TAPE_HEAD].setStyleSheet("QLineEdit { border: 2px solid red; }")
         return tptx
         
@@ -290,7 +290,7 @@ class GUI(QtGui.QWidget):
         log_label = QtGui.QLabel('Activity Log', self)
         self.log_textbox = QtGui.QTextEdit(self)
         self.log_textbox.setReadOnly(True)
-        log_vbox.addWidget(log_label, 0, QtCore.Qt.AlignCenter)
+        log_vbox.addWidget(log_label, 0, Qt.AlignCenter)
         log_vbox.addWidget(self.log_textbox)
         
         # Add some control buttons
@@ -314,12 +314,13 @@ class GUI(QtGui.QWidget):
         
         # Add source text box and load/save buttons
         ctrl_llabel = QtGui.QLabel("TM Source Code", self)
-        self.src_textbox = QtGui.QPlainTextEdit(self)
+        self.src_textbox = QtGui.QTextEdit(self)
+        highlighters.TMSourceHightlighter(self.src_textbox, "Classic" )
         self.src_load_btn = QtGui.QPushButton('Load', self)
         self.src_save_btn = QtGui.QPushButton('Save', self)
         
         self.ctrl_lvbox = QtGui.QVBoxLayout()
-        self.ctrl_lvbox.addWidget(ctrl_llabel, 0, QtCore.Qt.AlignCenter)
+        self.ctrl_lvbox.addWidget(ctrl_llabel, 0, Qt.AlignCenter)
         self.ctrl_lvbox.addWidget(self.src_textbox)
         self.ctrl_lvbox.addWidget(self.src_load_btn)
         self.ctrl_lvbox.addWidget(self.src_save_btn)
@@ -333,7 +334,7 @@ class GUI(QtGui.QWidget):
         self.run_all_btn = QtGui.QPushButton('Run Until Halt', self)
         
         self.ctrl_rvbox = QtGui.QVBoxLayout()
-        self.ctrl_rvbox.addWidget(ctrl_rlabel, 0, QtCore.Qt.AlignCenter)
+        self.ctrl_rvbox.addWidget(ctrl_rlabel, 0, Qt.AlignCenter)
         self.ctrl_rvbox.addWidget(self.tape_textbox)
         self.ctrl_rvbox.addWidget(self.set_tm_btn)
         self.ctrl_rvbox.addWidget(self.set_tape_btn)
@@ -374,7 +375,7 @@ class GUI(QtGui.QWidget):
         Prints a message on the log_textbox
         Text Color: RED
         """
-        self.log_textbox.setTextColor(GUI.QCOLOR_RED)
+        self.log_textbox.setTextColor(Qt.red)
         self.log_textbox.append(error)
     
     #
@@ -384,7 +385,7 @@ class GUI(QtGui.QWidget):
         Prints a message on the log_textbox
         Text Color: BLACK
         """
-        self.log_textbox.setTextColor(GUI.QCOLOR_BLK)
+        self.log_textbox.setTextColor(Qt.black)
         self.log_textbox.append(msg)
 #
 #
