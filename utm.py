@@ -339,7 +339,11 @@ class GUI(QtGui.QWidget):
         self.ctrl_rvbox.addWidget(self.set_tm_btn)
         self.ctrl_rvbox.addWidget(self.set_tape_btn)
         self.ctrl_rvbox.addWidget(self.run_step_btn)
-        self.ctrl_rvbox.addWidget(self.run_all_btn)   
+        self.ctrl_rvbox.addWidget(self.run_all_btn)
+        
+        # Add some tooltips
+        self.set_tape_btn.setToolTip('Sets the tape values and forces the TM '
+                                     'to be at the initial state')
        
         # Add the control area to the main layout
         self.ctrl_hbox.addLayout(self.ctrl_lvbox, 2)
