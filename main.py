@@ -102,7 +102,7 @@ class GUI(QtGui.QWidget):
             self._printInfoLog('Current state: ' + 
                                 str(self.turing_machine.getCurrentState()))
                                 
-            sys.stderr.write(str(self.turing_machine) + '\n')
+            #sys.stderr.write(str(self.turing_machine) + '\n')
         except Exception, e:
             self._printErrorLog(str(e))
             
@@ -196,7 +196,7 @@ class GUI(QtGui.QWidget):
                 tape_value = ' '.join(self.turing_machine.getTapeIterator())
                 self._printInfoLog('***************************************')
                 self._printInfoLog('Tape Values:')
-                self._printInfoLog(tape_value)
+                self._printStrikingInfoLog(tape_value)
                 self._printInfoLog('***************************************')
             except Exception, e:
                 self._printErrorLog(str(e))
@@ -376,6 +376,7 @@ class GUI(QtGui.QWidget):
         Text Color: RED
         """
         self.log_textbox.setTextColor(Qt.red)
+        self.log_textbox.setFontWeight( QtGui.QFont.Normal )
         self.log_textbox.append(error)
     
     #
@@ -386,6 +387,18 @@ class GUI(QtGui.QWidget):
         Text Color: BLACK
         """
         self.log_textbox.setTextColor(Qt.black)
+        self.log_textbox.setFontWeight( QtGui.QFont.Normal )
+        self.log_textbox.append(msg)
+        
+    #
+    #
+    def _printStrikingInfoLog(self, msg):
+        """
+        Prints a message on the log_textbox makeing it more visible than a
+        normal log
+        """
+        self.log_textbox.setTextColor( Qt.darkBlue )
+        self.log_textbox.setFontWeight( QtGui.QFont.Bold )
         self.log_textbox.append(msg)
 #
 #

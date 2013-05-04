@@ -17,17 +17,35 @@ class TMSourceHightlighter(QtGui.QSyntaxHighlighter):
         
         # Formats
         keyword = QtGui.QTextCharFormat()
+        comment = QtGui.QTextCharFormat()
+        trans_sym = QtGui.QTextCharFormat()
         
-        # HALT
-        brush = QtGui.QBrush( Qt.darkBlue, Qt.SolidPattern )
+        # Keywords
+        brush = QtGui.QBrush( Qt.darkMagenta, Qt.SolidPattern )
         keyword.setForeground( brush )
         keyword.setFontWeight( QtGui.QFont.Bold )
-        keywords = QtCore.QStringList( ["INITIAL", "FINAL", "BLANK", "HALT"])
+        keywords = QtCore.QStringList( ['INITIAL', 'FINAL', 'BLANK', 'HALT'])
         
         for word in keywords:
             pattern = QtCore.QRegExp("^\s*\\b" + word + "\\b")
             rule = HighlightingRule(pattern, keyword)
             self.highlighting_rules.append( rule )
+            
+        # Comment
+        brush = QtGui.QBrush( Qt.darkGreen, Qt.SolidPattern )
+        comment.setForeground( brush )
+        pattern = QtCore.QRegExp("^\s*%[^\n]*")
+        rule = HighlightingRule(pattern, comment)
+        self.highlighting_rules.append( rule )
+        
+        # Transition symbol
+        brush = QtGui.QBrush( Qt.red, Qt.SolidPattern )
+        trans_sym.setForeground( brush )
+        trans_sym.setFontWeight( QtGui.QFont.Bold )
+        pattern = QtCore.QRegExp("\B->\B")
+        rule = HighlightingRule(pattern, trans_sym)
+        self.highlighting_rules.append( rule )
+        
             
     #
     #   Overrided method
