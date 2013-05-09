@@ -34,12 +34,17 @@ class GUI(QtGui.QWidget):
     
     TAPE_SIZE = 31
     TAPE_HEAD = int(round(TAPE_SIZE / 2))
+    TAPE_HEAD_LEFT = TAPE_HEAD - 1
+    TAPE_HEAD_RIGHT = TAPE_HEAD + 1
     DEF_WIDTH = 800
     DEF_HEIGHT = 600
     HSPACING = 10
     VSPACING = 5
     ICON = 'icon.png'
     
+    # Tape style(s)
+    TAPE_HEAD_STYLE = 'QLineEdit { border: 2px solid red; background: white;}'
+        
     #
     #
     def __init__(self):
@@ -104,7 +109,7 @@ class GUI(QtGui.QWidget):
                                 
             #sys.stderr.write(str(self.turing_machine) + '\n')
         except Exception, e:
-            self._printErrorLog(str(e))
+            self._printErrorLog('Error: %s' % str(e))
             
     #
     #
@@ -115,7 +120,8 @@ class GUI(QtGui.QWidget):
             self.turing_machine.setAtInitialState()
             self._printInfoLog('Tape value established')
         else:
-            self._printErrorLog('You have to set the turing machine before set the tape')
+            self._printErrorLog('Error: The Turing machine must be set before'
+                                ' set the tape')
             
     #
     #
@@ -133,26 +139,33 @@ class GUI(QtGui.QWidget):
         except tmexceptions.UnknownTransitionException, e:
             self._printErrorLog(str(e))
             
+        except AttributeError:
+            self._printErrorLog('Error: Turing machine is unset')
+            
     #
     #            
     def onRunUntilHaltClicked(self):
         
-        if self.turing_machine.isAtHaltState():
-            self._printErrorLog('The current state is halt state')
+        try:
             
-        else:
-            self._printInfoLog('---------- Run Until Halt ----------')
-            
-            try:
-                while not self.turing_machine.isAtHaltState():
-                    self.turing_machine.step()
+            if self.turing_machine.isAtHaltState():
+                self._printErrorLog('Error: The Turing Machine is on halt state')
                 
-            except tmexceptions.UnsetTapeException, e:
-                self._printErrorLog(str(e))
+            else:
+                self._printInfoLog('---------- Run Until Halt ----------')
                 
-            except tmexceptions.UnknownTransitionException, e:
-                self._printErrorLog(str(e))
+                try:
+                    while not self.turing_machine.isAtHaltState():
+                        self.turing_machine.step()
+                    
+                except tmexceptions.UnsetTapeException, e:
+                    self._printErrorLog(str(e))
+                    
+                except tmexceptions.UnknownTransitionException, e:
+                    self._printErrorLog(str(e))
                 
+        except AttributeError:
+            self._printErrorLog('Error: Turing machine is unset')
     #
     #
     def onLoadClicked(self):
@@ -201,7 +214,8 @@ class GUI(QtGui.QWidget):
             except Exception, e:
                 self._printErrorLog(str(e))
         else:
-            self._printErrorLog('You have to set the turing machine before print the tape')
+            self._printErrorLog('Error: The Turing Machine must be set '
+                                'before print the tape')
         
             
     #
@@ -227,7 +241,7 @@ class GUI(QtGui.QWidget):
             self._printInfoLog('Head moved to the right')            
         else:
             self._printInfoLog('Head remains at the same position')
-        
+                   
         self._printInfoLog('Current state: ' + str(new_state) + 
             (' (FINAL)' if self.turing_machine.isAtFinalState() else '') ) 
     
@@ -273,11 +287,12 @@ class GUI(QtGui.QWidget):
     #
     def _createTape(self):
         tptx = [QtGui.QLineEdit(self) for i in xrange(GUI.TAPE_SIZE)]
-        for txbx in tptx:
+        for txbx in tptx:            
             txbx.setReadOnly(True)
             txbx.setFocusPolicy(Qt.NoFocus)
             txbx.setAlignment(Qt.AlignHCenter)
-        tptx[GUI.TAPE_HEAD].setStyleSheet("QLineEdit { border: 2px solid red; }")
+            
+        tptx[GUI.TAPE_HEAD].setStyleSheet(GUI.TAPE_HEAD_STYLE)
         return tptx
         
     #
@@ -322,8 +337,10 @@ class GUI(QtGui.QWidget):
         self.ctrl_lvbox = QtGui.QVBoxLayout()
         self.ctrl_lvbox.addWidget(ctrl_llabel, 0, Qt.AlignCenter)
         self.ctrl_lvbox.addWidget(self.src_textbox)
-        self.ctrl_lvbox.addWidget(self.src_load_btn)
-        self.ctrl_lvbox.addWidget(self.src_save_btn)
+        ctrl_btn_hbox = QtGui.QHBoxLayout()
+        ctrl_btn_hbox.addWidget(self.src_load_btn)
+        ctrl_btn_hbox.addWidget(self.src_save_btn)
+        self.ctrl_lvbox.addLayout(ctrl_btn_hbox)
         
         # Add control buttons
         ctrl_rlabel = QtGui.QLabel("Tape's Initial Value", self)
@@ -371,7 +388,7 @@ class GUI(QtGui.QWidget):
             tape_index = head_pos + inc + 1
             sym = self.turing_machine.getSymbolAt(tape_index)
             self.tape_textboxes[i].setText('' if sym == blank else str(sym))
-    
+                                                  
     #
     #
     def _printErrorLog(self, error):

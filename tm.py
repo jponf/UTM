@@ -52,7 +52,7 @@ class TuringMachine:
             - blank: 
                 Default symbol in all unespecified tape possitions
         """
-        self._states = frozenset(states);
+        self._states = frozenset(states)
         self._in_alphabet = frozenset(in_alphabet)
         self._tape_alphabet = frozenset(tape_alphabet)
         self._trans_function = copy.copy(trans_function)
@@ -107,8 +107,7 @@ class TuringMachine:
                 if self._head == 0:
                     self._tape.insert(0, self._blank)
                 else:
-                    self._head -= 1
-                    
+                    self._head -= 1                    
                     
             elif movement == TuringMachine.MOVE_RIGHT:
                 self._head += 1
@@ -327,6 +326,7 @@ class TuringMachine:
             self._head = 0
         elif head_pos >= len(tape):
             self._tape = list(tape)
+            if not self._tape: self._tape = [self._blank] # Empty tape
             self._tape.extend( [self._blank] * (head_pos - len(tape)) )
             self._head = head_pos
         else:
