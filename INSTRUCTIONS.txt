@@ -35,7 +35,7 @@ How are the symbols and states defined?
 
 --- Syntax ---
 
-+ The comments are specified by writing an '%'' at the begining of the line.
++ Comments are specified by writing an '%'' at the begining of the line.
   It is also possible to add any amount of white spaces before the '%'' symbol.
   E.g:
 
@@ -69,7 +69,7 @@ How are the symbols and states defined?
   When the TM is on a final state, it is indicated on the log textbox.
 
 
-+ The transitions are specified using the following syntax:
++ Transitions are specified using the following syntax:
 
     <from_state>, <symbol_on_tape> -> <to_state>, <symbol_to_write>, <head_movement>
 
