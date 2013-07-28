@@ -86,7 +86,7 @@ class TuringMachine:
               symbol, raises UnknownTransitionException
         """
         if self.isAtHaltState():
-            raise tmexceptions.HaltStateException('The current state is halt state')
+            raise tmexceptions.HaltStateException('Current state is halt state')
         if self._tape == None:
             raise tmexceptions.UnsetTapeException(
                 'Tape must be set before perform an step')
