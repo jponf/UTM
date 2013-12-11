@@ -1,8 +1,17 @@
 Universal Turing Machine
 ========================
-Simple Turing Machine simulator implemented using Python and PyQt4
+_Simple Turing Machine simulator implemented using Python and PyQt4_
 
 ![application logo][logo]
+
+## Executing the simulator ##
+
+To execute the simulator has to be executed the utm.py file.
+
+  + In any O.S with a python interpreter
+    - python utm.py
+  + In linux giving execution permissions to utm.py
+    - ./utm.py
 
 ## Requirements ##
 
@@ -15,6 +24,9 @@ Simple Turing Machine simulator implemented using Python and PyQt4
 
 It is possible to write the source code directly on the simulator interface or write
 it in an external editor and load it later.
+
+In order to simplify the syntax, any symbol or state defined in the machine instructions
+is automatically added to the set of possible symbols or states of the turing machine.
 
 ### Syntax ###
 
@@ -36,12 +48,11 @@ it in an external editor and load it later.
       + *\<symbol_on_tape\>* and *\<symbol_to_write\>* can be any character (one character!) you want.
       + *\<head_movement\>* must be one of the following characters:
   
-        + '<' - Move to the left
-        + '>' - Move to the right
-        + '_' - No movement
+        + '<' -- Move to the left
+        + '>' -- Move to the right
+        + '_' -- No movement
 
-  [Examples][examples]
-    
+Here there are some syntax examples [Examples][examples]
 
 [logo]: ./graphics/icon.png "Application Logo"
 [examples]: ./tm_examples
