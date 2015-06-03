@@ -6,11 +6,11 @@ _Simple Turing Machine simulator implemented using Python and PyQt4_
 
 ## Executing the simulator ##
 
-To execute the simulator has to be executed the utm.py file.
+The simulator main is in the utm.py file.
 
   + In any O.S with a python interpreter
     - python utm.py
-  + In linux giving execution permissions to utm.py
+  + In Linux/BSD/OS X giving execution permissions to utm.py
     - ./utm.py
 
 ## Requirements ##
@@ -25,7 +25,7 @@ To execute the simulator has to be executed the utm.py file.
 It is possible to write the source code directly on the simulator interface or write
 it in an external editor and load it later.
 
-In order to simplify the syntax, any symbol or state defined in the machine instructions
+For the sake of simplicity, any symbol or state defined in the machine instructions
 is automatically added to the set of possible symbols or states of the turing machine.
 
 ### Syntax ###
