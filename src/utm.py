@@ -131,7 +131,7 @@ class GUI(QtGui.QWidget):
         tm_str = str(self.src_textbox.toPlainText())
         try:
             self.parser.clean()
-            self.parser.parseString(tm_str)
+            self.parser.parse_string(tm_str)
             self.turing_machine = self.parser.create()
             self.turing_machine.attach_observer(TuringMachineObserver(self))
             

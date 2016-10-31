@@ -42,13 +42,13 @@ class TuringMachineBuilder:
         self._blank = None
         self._halt_state = None
 
-    def addTransition(self, state, symbol, new_state, new_symbol, movement):
+    def add_transition(self, state, symbol, new_state, new_symbol, movement):
         """
         addTransition(state, symbol, new_state, new_symbol, movement)
                 
         Adds the transition:
             From state,symbol To new_state writing new_symbol at the current 
-            possition and moving the head in movement direction
+            position and moving the head in movement direction
              
         - state: something that represents a state, must be hashable
         - symbol: something that represents a symbol, must be hashable
@@ -64,7 +64,7 @@ class TuringMachineBuilder:
             raise Exception('Invalid movement')
         
         if (hasattr(symbol, 'len') and len(symbol) > 1) or \
-            (hasattr(new_symbol, 'len') and len(new_symbol) > 1):
+                (hasattr(new_symbol, 'len') and len(new_symbol) > 1):
             raise Exception('Symbol length > 1')
         
         if state not in self._states:
@@ -79,10 +79,10 @@ class TuringMachineBuilder:
         if new_symbol != self._blank and new_symbol not in self._in_alphabet:
             self._in_alphabet.add(new_symbol)
             
-        self._trans_function[(state,symbol)] = (new_state, new_symbol,
+        self._trans_function[(state, symbol)] = (new_state, new_symbol,
                                                  movement)
 
-    def addFinalState(self, state):
+    def add_final_state(self, state):
         """
         Adds the specified state to the set of final states
         """
@@ -91,7 +91,7 @@ class TuringMachineBuilder:
         if state not in self._final_states:
             self._final_states.add(state)
 
-    def setInitialState(self, state):
+    def set_initial_state(self, state):
         """
         Set the specified state as the initial. Mandatory operation
         """
@@ -99,28 +99,28 @@ class TuringMachineBuilder:
             self._states.add(state)
         self._init_state = state
 
-    def hasInitialState(self):
+    def has_initial_state(self):
         """
         Returns True if the initial state was specified on a previous call
         to setInitialState
         """
-        return self._init_state != None
+        return self._init_state is not None
 
-    def hasHaltState(self):
+    def has_halt_state(self):
         """
-        Returns True if the halt state was specified on a preivous call to
+        Returns True if the halt state was specified on a previous call to
         setHaltState
         """
-        return self._halt_state != None
+        return self._halt_state is not None
 
-    def hasBlankSymbol(self):
+    def has_blank_symbol(self):
         """
-        Returns True if the halt state was specified on a preivous call to
+        Returns True if the halt state was specified on a previous call to
         setBlankSymbol
         """
-        return self._blank != None
+        return self._blank is not None
 
-    def setBlankSymbol(self, blank_sym):
+    def set_blank_symbol(self, blank_sym):
         """
         Specifies a new blank symbol
             - The blank symbol must be one char length
@@ -132,14 +132,14 @@ class TuringMachineBuilder:
             
         self._blank = blank_sym
 
-    def setHaltState(self, haltstate):
+    def set_halt_state(self, haltstate):
         """
         Specifies a new halt state
         """
         
         # If there are a previous halt state. Check if it appears in some
         # transition otherwise delete it from the list of states
-        if self.hasHaltState():
+        if self.has_halt_state():
             old_remains = False
             for k, v in self._trans_function.items():
                 if k[0] == self._halt_state or v[0] == self._halt_state:
@@ -163,13 +163,13 @@ class TuringMachineBuilder:
         
         At this point the tape_alphabet is set to be: in_alphabet U {blank}
         """
-        if not self.hasInitialState():
+        if not self.has_initial_state():
             raise Exception('It is necessary to specify an initial state')
             
-        if not self.hasBlankSymbol():
+        if not self.has_blank_symbol():
             raise Exception('It is necessary to specify the blank symbol')
             
-        if not self.hasHaltState():
+        if not self.has_halt_state():
             raise Exception('It is necessary to specify the halt state')
 
         tape_alphabet = set(self._in_alphabet)
@@ -180,7 +180,7 @@ class TuringMachineBuilder:
                              self._final_states, self._halt_state,
                              self._blank)
 
-    def getHaltState(self):
+    def get_halt_state(self):
         """
         Returns the halt state specified or assigned by default on the 
         initialization of this Builder
@@ -191,21 +191,18 @@ class TuringMachineBuilder:
 if __name__ == '__main__':
     tmb = TuringMachineBuilder()
     
-    tmb.setBlankSymbol('#')
-    tmb.setHaltState('HALT')
+    tmb.set_blank_symbol('#')
+    tmb.set_halt_state('HALT')
     
-    tmb.addTransition(1, 0, 2, 1, TuringMachine.MOVE_RIGHT)
-    tmb.addTransition(1, 1, 2, 0, TuringMachine.MOVE_RIGHT)
-    tmb.addTransition(2, 0, 1, 0, TuringMachine.NON_MOVEMENT)
-    tmb.addTransition(2, 1, 3, 1, TuringMachine.MOVE_RIGHT)
-    tmb.addTransition(3, 0, 'HALT', 0, TuringMachine.NON_MOVEMENT)
-    tmb.addTransition(3, 1, 'HALT', 1, TuringMachine.NON_MOVEMENT)
-    tmb.addTransition(3, '#', 'HALT', '#', TuringMachine.NON_MOVEMENT)
+    tmb.add_transition(1, 0, 2, 1, TuringMachine.MOVE_RIGHT)
+    tmb.add_transition(1, 1, 2, 0, TuringMachine.MOVE_RIGHT)
+    tmb.add_transition(2, 0, 1, 0, TuringMachine.NON_MOVEMENT)
+    tmb.add_transition(2, 1, 3, 1, TuringMachine.MOVE_RIGHT)
+    tmb.add_transition(3, 0, 'HALT', 0, TuringMachine.NON_MOVEMENT)
+    tmb.add_transition(3, 1, 'HALT', 1, TuringMachine.NON_MOVEMENT)
+    tmb.add_transition(3, '#', 'HALT', '#', TuringMachine.NON_MOVEMENT)
     
-    tmb.setInitialState(1)
-    tmb.addFinalState(2)
+    tmb.set_initial_state(1)
+    tmb.add_final_state(2)
     
     print(tmb.create())
-    
-
-    

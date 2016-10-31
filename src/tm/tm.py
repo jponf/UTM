@@ -13,7 +13,7 @@ from tm.exceptions import HaltStateException, InvalidSymbolException, \
 
 class TuringMachine:
     """
-    Represents a turing machine, to work propertly there are some restrictions:
+    Represents a turing machine, to work properly there are some restrictions:
         - symbols on input alphabet and tape alphabet must be one char length
 
         - transition function must be a dictionary with the following format:
@@ -51,9 +51,9 @@ class TuringMachine:
             - fstates:
                 Iterable with the possible final states
             - hstate:
-                Halt state. If reached, execution stops inmediatly
+                Halt state. If reached, execution stops immediatly
             - blank: 
-                Default symbol in all unespecified tape possitions
+                Default symbol in all unspecified tape positions
         """
         self._states = frozenset(states)
         self._in_alphabet = frozenset(in_alphabet)
@@ -371,15 +371,19 @@ class TuringMachine:
                                 (str(k), str(v)))
 
             inv_state = None
-            if k[0] not in self._states:    inv_state = k[0]
-            if v[0] not in self._states:    inv_state = v[0]
+            if k[0] not in self._states:
+                inv_state = k[0]
+            if v[0] not in self._states:
+                inv_state = v[0]
             if inv_state:
                 raise Exception('Invalid state %s in transition %s -> %s' %
                                 (str(inv_state), str(k), str(v)))
                 
             inv_sym = None
-            if k[1] not in self._tape_alphabet: inv_sym = k[1]
-            if v[1] not in self._tape_alphabet: inv_sym = v[1]
+            if k[1] not in self._tape_alphabet:
+                inv_sym = k[1]
+            if v[1] not in self._tape_alphabet:
+                inv_sym = v[1]
             if inv_sym:
                 raise Exception('Invalid symbol %s in transition %s -> %s' %
                                 (str(inv_sym), str(k), str(v)))
