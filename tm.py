@@ -1,10 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
 import copy
 import inspect
-import tmexceptions
 
+from abc import ABCMeta, abstractmethod
+
+from tmexceptions import HaltStateException, InvalidSymbolException, \
+                         UnknownTransitionException, UnsetTapeException
+
+
+# TODO: rewrite doc
 
 class TuringMachine:
     """
@@ -25,10 +32,8 @@ class TuringMachine:
     NON_MOVEMENT = 3
     HEAD_MOVEMENTS = frozenset((MOVE_LEFT, MOVE_RIGHT, NON_MOVEMENT))
 
-    #
-    #
     def __init__(self, states, in_alphabet, tape_alphabet, trans_function,
-                 istate, fstates, hstate, blank):
+                 init_state, final_states, halt_state, blank_sym):
         """
         TuringMachine(states, in_alphabet, tape_alphabet, trans_function,
                     istate, fstate, hstate, blank)
@@ -56,17 +61,17 @@ class TuringMachine:
         self._in_alphabet = frozenset(in_alphabet)
         self._tape_alphabet = frozenset(tape_alphabet)
         self._trans_function = copy.copy(trans_function)
-        self._istate = istate
-        self._fstates = frozenset(fstates)
-        self._hstate = hstate
-        self._blank = blank
+        self._init_state = init_state
+        self._final_states = frozenset(final_states)
+        self._halt_state = halt_state
+        self._blank_sym = blank_sym
 
         self._check_data()
         
         # Machine tape, head and current state
         self._tape = None
         self._head = 0
-        self._cur_state = istate
+        self._cur_state = init_state
         self._num_executed_steps = 0
         
         # Set of observers
@@ -84,9 +89,9 @@ class TuringMachine:
               symbol, raises UnknownTransitionException
         """
         if self.is_at_halt_state():
-            raise tmexceptions.HaltStateException('Current state is halt state')
+            raise HaltStateException('Current state is halt state')
         if self._tape is None:
-            raise tmexceptions.UnsetTapeException(
+            raise UnsetTapeException(
                 'Tape must be set before perform an step')
                 
         cur = (self._cur_state, self._tape[self._head])
@@ -103,14 +108,14 @@ class TuringMachine:
             
             if movement == TuringMachine.MOVE_LEFT:
                 if self._head == 0:
-                    self._tape.insert(0, self._blank)
+                    self._tape.insert(0, self._blank_sym)
                 else:
                     self._head -= 1
                     
             elif movement == TuringMachine.MOVE_RIGHT:
                 self._head += 1
                 if self._head == len(self._tape):
-                    self._tape.append(self._blank)                
+                    self._tape.append(self._blank_sym)
         
             # Notify observers
             for obs in self._observers:
@@ -122,7 +127,7 @@ class TuringMachine:
             self._num_executed_steps += 1
         
         except KeyError:
-            raise tmexceptions.UnknownTransitionException(
+            raise UnknownTransitionException(
                 'There are no transition for %s' % str(cur))
 
     def run(self, max_steps=None):
@@ -139,20 +144,18 @@ class TuringMachine:
         try:
             if max_steps:
                 try:
-    
                     for _ in range(max_steps):
                         self.run_step()
                     return 1
-                except tmexceptions.HaltStateException:
+                except HaltStateException:
                     return 0
                     
             else:
-                
                 while not self.is_at_halt_state():
                     self.run_step()
                 return 0
                 
-        except tmexceptions.UnknownTransitionException:
+        except UnknownTransitionException:
             return 2
 
     def get_current_state(self):
@@ -165,19 +168,19 @@ class TuringMachine:
         """
         Returns the blank symbol
         """
-        return self._blank
+        return self._blank_sym
 
     def get_halt_state(self):
         """
         Returns the halt state
         """
-        return self._hstate
+        return self._halt_state
 
     def get_initial_state(self):
         """
         Returns the initial state
         """
-        return self._istate
+        return self._init_state
 
     def get_symbol_at(self, pos):
         """
@@ -187,7 +190,7 @@ class TuringMachine:
         for any other position out of this range the blank symbol is returned
         """
         if pos < 0 or pos >= len(self._tape):
-            return self._blank
+            return self._blank_sym
             
         return self._tape[pos]
 
@@ -223,13 +226,13 @@ class TuringMachine:
         """
         Returns true only if current state is the halt state
         """
-        return self._cur_state == self._hstate
+        return self._cur_state == self._halt_state
 
     def is_at_final_state(self):
         """
         Returns true only if current state is a final state
         """
-        return self._cur_state in self._fstates
+        return self._cur_state in self._final_states
 
     def is_tape_set(self):
         """
@@ -283,18 +286,18 @@ class TuringMachine:
         
         for s in tape:
             if s not in self._tape_alphabet:
-                raise tmexceptions.InvalidSymbolException(
-                    'Invalid tape symbol %s' % str(s))
+                raise InvalidSymbolException("Invalid tape symbol " + str(s))
         
         # If head pos is out of tape make tape grow with blanks 
         if head_pos < 0:
-            self._tape = [self._blank] * (-head_pos)
+            self._tape = [self._blank_sym] * (-head_pos)
             self._tape.extend(tape)
             self._head = 0
         elif head_pos >= len(tape):
             self._tape = list(tape)
-            if not self._tape: self._tape = [self._blank] # Empty tape
-            self._tape.extend( [self._blank] * (head_pos - len(tape)) )
+            if not self._tape:
+                self._tape = [self._blank_sym]  # Empty tape
+            self._tape.extend([self._blank_sym] * (head_pos - len(tape)))
             self._head = head_pos
         else:
             self._tape = list(tape)
@@ -304,69 +307,23 @@ class TuringMachine:
             obs.on_tape_changed(head_pos)
 
     def set_at_initial_state(self):
+        """Forces the machine state to be the initial state
         """
-        Forces the machine state to be the initial state
-        """
-        self._cur_state = self._istate
+        self._cur_state = self._init_state
 
     def attach_observer(self, observer):
-        """
-        Attach an observer to this Turing Machine
-        
-        Observers must implement the following methods:
-            
-            on_step_start(current_state, current_tape_symbol)
-                Called at the beginning of a new state, after check if exists
-                a transition for the current (state, symbol)
-                
-                - current_state is the state after perform the transition
-                - current_tape_symbol is the symbol at the head position
-                
-            on_step_end(new_state, writen_symbol, movement)
-                Called when an steps end successfully
-                
-                - new_state is the state after perform the transition
-                - writen_symbol is the symbol writen to the tape at the previous head position
-                - movement is the head move direction after write new_symbol
-                
-            on_tape_changed(head_pos)
-                Called after a successful call to setTape
-                
-                - head_pos is the specified position on the call to setTape
-                
-            on_head_moved(head_pos, old_head_pos)
-                Called when the head position changes
-                
-                - head_pos is the actual head position (after movement)
-                - old_head_pos is the previous head position (before movement)
+        """Attach an observer to this Turing Machine
         """
         # Observer must have the following method
-        if not hasattr(observer, 'on_step_start'):
-            raise Exception('Observer must have an on_step_start method')
-        if not hasattr(observer, 'on_step_end'):
-            raise Exception('Observer must have an on_step_end method')
-        if not hasattr(observer, 'on_tape_changed'):
-            raise Exception('Observer must have an on_tape_changed method')
-        if not hasattr(observer, 'on_head_moved'):
-            raise Exception('Observer must have an on_head_moved method')
-
-        if not _get_num_arguments(observer.on_step_start) == 2:
-            raise Exception('Observer on_step_start method must have 2 parameters')
-        if not _get_num_arguments(observer.on_step_end) == 3:
-            raise Exception('Observer on_step_end method must have 3 parameters')
-        if not _get_num_arguments(observer.on_tape_changed) == 1:
-            raise Exception('Observer on_tape_changed method must have 1 parameters')
-        if not _get_num_arguments(observer.on_head_moved) == 2:
-            raise Exception('Observer on_head_moved method must have 2 parameters')
+        if not isinstance(observer, TuringMachineObserver):
+            raise TypeError(
+                "Observer must be subclass of TuringMachineObserver")
         
         if observer not in self._observers:
             self._observers.append(observer)
-        
-    #
-    #
+
     def detach_observer(self, observer):
-        """
-        Remove the specified observer
+        """Remove the specified observer
         """
         try:
             self._observers.remove(observer)
@@ -374,8 +331,7 @@ class TuringMachine:
             pass
 
     def reset_executed_steps_counter(self):
-        """
-        Set the executed steps counter to 0
+        """Set the executed steps counter to 0
         """
         self._num_executed_steps = 0
 
@@ -402,13 +358,13 @@ class TuringMachine:
         if not self._in_alphabet.issubset(self._tape_alphabet):
             raise Exception('Input alphabet is not subset of tape alphabet')
 
-        if self._blank not in self._tape_alphabet:
+        if self._blank_sym not in self._tape_alphabet:
             raise Exception('Blank symbol is not into the tape alphabet')
 
-        if self._istate not in self._states:
+        if self._init_state not in self._states:
             raise Exception('Initial state is not a valid state')
 
-        if not self._fstates.issubset(self._states):
+        if not self._final_states.issubset(self._states):
             raise Exception('Final states are not a subset of states')
 
         for k, v in self._trans_function.items():
@@ -445,30 +401,34 @@ class TuringMachine:
                'Transition Function:\n%s' \
                 % (
                    str(self._states), str(self._in_alphabet),
-                   str(self._tape_alphabet), str(self._blank), str(self._istate),
-                   str(self._fstates), str(self._hstate),
+                   str(self._tape_alphabet), str(self._blank_sym),
+                   str(self._init_state),
+                   str(self._final_states), str(self._halt_state),
                    str(self._trans_function)
                    )
 
 
-# Utility functions
+# Turing Machine Observers base class
 ##############################################################################
 
-def _get_num_arguments(func):
-    """
-    Return the number of arguments of the specified function
-    
-    If the functions belongs to an instance of any class the self parameter
-    is ignored
-    """
-    argspec = inspect.getargspec(func)
-    args = argspec[0]
-    
-    if args.index('self') == 0:
-        return len(args) - 1
-        
-    return len(args)
-    
+class BaseTuringMachineObserver(metaclass=ABCMeta):
+
+    @abstractmethod
+    def on_step_start(self, state, symbol):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def on_step_end(self, state, symbol, movement):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def on_tape_changed(self, head_pos):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def on_head_moved(self, head_pos, old_head_pos):
+        raise NotImplementedError()
+
 
 # Test class
 #

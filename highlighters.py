@@ -52,7 +52,7 @@ class TMSourceHighlighter(QtGui.QSyntaxHighlighter):
             while index >= 0:
                 length = expression.matchedLength()
                 self.setFormat(index, length, rule.format)
-                index = text.indexOf(expression, index + length)
+                index = text.index(expression.pattern(), index + length)
                 
         self.setCurrentBlockState(0)
 
