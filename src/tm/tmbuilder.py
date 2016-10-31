@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from tm import TuringMachine
+from tm.tm import TuringMachine
+
 
 class TuringMachineBuilder:
     """
@@ -22,14 +23,12 @@ class TuringMachineBuilder:
         self._states = set()
         self._in_alphabet = set()
         self._trans_function = {}
-        self._istate = None
-        self._fstates = set()
+        self._init_state = None
+        self._final_states = set()
         
         self._blank = None
-        self._haltstate = None
-        
-    #
-    #
+        self._halt_state = None
+
     def clean(self):
         """
         Clear all the previous stored data
@@ -37,14 +36,12 @@ class TuringMachineBuilder:
         self._states = set()
         self._in_alphabet = set()
         self._trans_function = {}
-        self._istate = None
-        self._fstates = set()
+        self._init_state = None
+        self._final_states = set()
         
         self._blank = None
-        self._haltstate = None
-        
-    #
-    #    
+        self._halt_state = None
+
     def addTransition(self, state, symbol, new_state, new_symbol, movement):
         """
         addTransition(state, symbol, new_state, new_symbol, movement)
@@ -84,58 +81,45 @@ class TuringMachineBuilder:
             
         self._trans_function[(state,symbol)] = (new_state, new_symbol,
                                                  movement)
-    #
-    #                                             
+
     def addFinalState(self, state):
         """
         Adds the specified state to the set of final states
         """
         if state not in self._states:
             self._states.add(state)
-        if state not in self._fstates:
-            self._fstates.add(state)
-           
-    #
-    #      
+        if state not in self._final_states:
+            self._final_states.add(state)
+
     def setInitialState(self, state):
         """
         Set the specified state as the initial. Mandatory operation
         """
         if state not in self._states:
             self._states.add(state)
-        self._istate = state
-        
-     
-    #
-    #
+        self._init_state = state
+
     def hasInitialState(self):
         """
         Returns True if the initial state was specified on a previous call
         to setInitialState
         """
-        return self._istate != None
-        
-    #
-    #
+        return self._init_state != None
+
     def hasHaltState(self):
         """
         Returns True if the halt state was specified on a preivous call to
         setHaltState
         """
-        return self._haltstate != None
-        
-    #
-    #
+        return self._halt_state != None
+
     def hasBlankSymbol(self):
         """
         Returns True if the halt state was specified on a preivous call to
         setBlankSymbol
         """
         return self._blank != None
-        
-        
-    #
-    #
+
     def setBlankSymbol(self, blank_sym):
         """
         Specifies a new blank symbol
@@ -147,9 +131,7 @@ class TuringMachineBuilder:
             raise Exception('Symbol must be one char length')
             
         self._blank = blank_sym
-        
-    #
-    #
+
     def setHaltState(self, haltstate):
         """
         Specifies a new halt state
@@ -160,18 +142,16 @@ class TuringMachineBuilder:
         if self.hasHaltState():
             old_remains = False
             for k, v in self._trans_function.items():
-                if k[0] == self._haltstate or v[0] == self._haltstate:
+                if k[0] == self._halt_state or v[0] == self._halt_state:
                     old_remains = True
                     break
                 
             if not old_remains:
-                self._states.remove(self._haltstate)
+                self._states.remove(self._halt_state)
                      
-        self._haltstate = haltstate
-        self._states.add(self._haltstate)                
-    
-    #
-    #
+        self._halt_state = haltstate
+        self._states.add(self._halt_state)
+
     def create(self):
         """
         Creates a turing machine instance with the collected information.
@@ -191,23 +171,21 @@ class TuringMachineBuilder:
             
         if not self.hasHaltState():
             raise Exception('It is necessary to specify the halt state')
-        
-        
+
         tape_alphabet = set(self._in_alphabet)
         tape_alphabet.add(self._blank)
         
         return TuringMachine(self._states, self._in_alphabet, tape_alphabet,
-                             self._trans_function, self._istate, 
-                             self._fstates, self._haltstate, self._blank)
-                             
-    #
-    #
+                             self._trans_function, self._init_state,
+                             self._final_states, self._halt_state,
+                             self._blank)
+
     def getHaltState(self):
         """
         Returns the halt state specified or assigned by default on the 
         initialization of this Builder
         """
-        return self._haltstate
+        return self._halt_state
             
 
 if __name__ == '__main__':

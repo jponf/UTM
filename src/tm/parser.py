@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from tm import TuringMachine
-from tmbuilder import TuringMachineBuilder
-
+import logging
 import re
 import sys
-import logging
+
+from tm.tm import TuringMachine
+from tm.tmbuilder import TuringMachineBuilder
+
 
 class TuringMachineParser:
     """
@@ -50,36 +51,25 @@ class TuringMachineParser:
                                           TuringMachineParser.MOVE_RIGHT,
                                           TuringMachineParser.NON_MOVEMENT)
                                         )
-                                        
-                                         
-    #
-    #
+
     def clean(self):
-        """
-        Cleans all the previos parsed data
+        """Cleans all the previous parsed data
         """
         self._builder.clean()
-         
-    #
-    #
+
     def parseString(self, string_data):
-        """
-        Parses the given string an add the information to the Turing Machine
-        builder
+        """Parses the given string an adds the information to the Turing
+        Machine builder
         
-        Raise an exception if the given data is not an string
+        Raise an exception if the given data is not a string
         """
         if type(string_data) != str:
             raise Exception('Expected an string')
         
         self._parse(string_data.splitlines())
-        
-        
-    #
-    #
+
     def parseLine(self, data):
-        """
-        Parse the given line of data
+        """Parse the given line of data
         """
         # The most expected expresions are in order:
         # - Transition
@@ -95,9 +85,7 @@ class TuringMachineParser:
                             if not self._parseHaltState(data):                                                
                                 raise Exception('Unrecognized pattern: %s' 
                                                 % data)
-                                                
-    #
-    #
+
     def create(self):
         """
         Attempts to create a Turing Machine with the parsed data until the
@@ -106,9 +94,7 @@ class TuringMachineParser:
         Can raise any of the TuringMachineBuilder an TuringMachine exceptions
         """
         return self._builder.create()
-                                                
-    #
-    #
+
     def _parseComment(self, data):
         """
         Returns True if the given data is a comment expresion, otherwise
@@ -119,8 +105,6 @@ class TuringMachineParser:
             return True
         return False
 
-    #
-    #
     def _parseBlankSymbol(self, data):
         """
         Returns True if the given data is a blank symbol expresion, otherwise
@@ -135,9 +119,7 @@ class TuringMachineParser:
             return True
             
         return False
-        
-    #
-    #
+
     def _parseHaltState(self, data):
         """
         Returns True if the given data is a halt state expresion, otherwise
@@ -155,9 +137,7 @@ class TuringMachineParser:
             return True
             
         return False
-        
-    #
-    #
+
     def _parseFinalState(self, data):
         """
         Returns True if the given data is a final state expresion, otherwise
@@ -169,9 +149,7 @@ class TuringMachineParser:
             return True
             
         return False
-        
-    #
-    #
+
     def _parseInitialState(self, data):
         """
         Returns True if the given data is an initial state expresion, otherwise
@@ -186,9 +164,7 @@ class TuringMachineParser:
             return True
             
         return False
-        
-    #
-    #
+
     def _parseTransition(self, data):
         """
         Returns True if the given data is a transition state expresion,
@@ -212,9 +188,7 @@ class TuringMachineParser:
             return True
             
         return False
-                                
-    #
-    #
+
     def _parse(self, parse_data):
         """
         Parses the specified data

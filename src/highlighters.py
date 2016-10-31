@@ -12,15 +12,10 @@ class TMSourceHighlighter(QtGui.QSyntaxHighlighter):
 
         self.parent = parent        
         self.highlighting_rules = []
-        
-        # Formats
-        keyword = QtGui.QTextCharFormat()
-        comment = QtGui.QTextCharFormat()
-        trans_sym = QtGui.QTextCharFormat()
-        
+
         # Keywords
-        brush = QtGui.QBrush(Qt.darkMagenta, Qt.SolidPattern)
-        keyword.setForeground(brush)
+        keyword = QtGui.QTextCharFormat()
+        keyword.setForeground(QtGui.QBrush(Qt.darkMagenta, Qt.SolidPattern))
         keyword.setFontWeight(QtGui.QFont.Bold)
         keywords = ["INITIAL", "FINAL", "BLANK", "HALT"]
         
@@ -30,15 +25,15 @@ class TMSourceHighlighter(QtGui.QSyntaxHighlighter):
             self.highlighting_rules.append(rule)
             
         # Comment
-        brush = QtGui.QBrush(Qt.darkGreen, Qt.SolidPattern)
-        comment.setForeground(brush)
+        comment = QtGui.QTextCharFormat()
+        comment.setForeground(QtGui.QBrush(Qt.darkGreen, Qt.SolidPattern))
         pattern = QtCore.QRegExp("^\s*%[^\n]*")
         rule = HighlightingRule(pattern, comment)
         self.highlighting_rules.append(rule)
         
         # Transition symbol
-        brush = QtGui.QBrush(Qt.red, Qt.SolidPattern)
-        trans_sym.setForeground(brush)
+        trans_sym = QtGui.QTextCharFormat()
+        trans_sym.setForeground(QtGui.QBrush(Qt.red, Qt.SolidPattern))
         trans_sym.setFontWeight(QtGui.QFont.Bold)
         pattern = QtCore.QRegExp("\B->\B")
         rule = HighlightingRule(pattern, trans_sym)
@@ -52,7 +47,7 @@ class TMSourceHighlighter(QtGui.QSyntaxHighlighter):
             while index >= 0:
                 length = expression.matchedLength()
                 self.setFormat(index, length, rule.format)
-                index = text.index(expression.pattern(), index + length)
+                index = expression.indexIn(text, index + length)
                 
         self.setCurrentBlockState(0)
 

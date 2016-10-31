@@ -2,18 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import os
+import pkgutil
 import sys
 
-import tm
-import tmparser
-import tmexceptions
 import highlighters
-
-from tm import BaseTuringMachineObserver
-
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
 
+from tm import BaseTuringMachineObserver, TuringMachine, TuringMachineParser
+from tm.exceptions import UnknownTransitionException, HaltStateException, \
+                          TapeNotSetException
 
 __program__ = 'Universal Turing Machine Simulator'
 __version__ = '1.1'
@@ -46,41 +44,38 @@ def main():
 class GUI(QtGui.QWidget):
     
     TAPE_SIZE = 31
-    TAPE_HEAD = int(round(TAPE_SIZE / 2))
+    TAPE_HEAD = TAPE_SIZE // 2
     TAPE_HEAD_LEFT = TAPE_HEAD - 1
     TAPE_HEAD_RIGHT = TAPE_HEAD + 1
     DEF_WIDTH = 800
     DEF_HEIGHT = 600
     H_SPACING = 10
     V_SPACING = 5
-    ICON = 'icon.png'
-    
+
     # Tape style(s)
     TAPE_HEAD_STYLE = 'QLineEdit { border: 2px solid red; background: white;}'
 
     def __init__(self):
         super().__init__()
-        # Turing machine and Turing machine parser
-        self.parser = tmparser.TuringMachineParser()
+
+        self.parser = TuringMachineParser()
         self.turing_machine = None
 
     def init_gui(self):
-        
         # Configure window
         self.setMinimumSize(GUI.DEF_WIDTH, GUI.DEF_HEIGHT)   
         self.setWindowTitle(__program__)
-        self.setWindowIcon(QtGui.QIcon(GUI.ICON))
-        
+
         self.main_vbox = QtGui.QVBoxLayout(self)
-        
+
+        # Set GUI icon
+        self._init_icon()
         # Add Tape widgets
         self._init_tape()
         # Add log text box
         self._init_log_area()
-        
         # Add controls
         self._init_control_area()
-
         # Install handlers
         self._install_handlers()
         
@@ -161,14 +156,16 @@ class GUI(QtGui.QWidget):
     def on_run_step_clicked(self):
         try:
             self.turing_machine.run_step()
-        except tmexceptions.HaltStateException as e:
+        except HaltStateException as e:
             self.print_error_log(str(e))
-        except tmexceptions.UnsetTapeException as e:
+        except TapeNotSetException as e:
             self.print_error_log(str(e))
-        except tmexceptions.UnknownTransitionException as e:
+        except UnknownTransitionException as e:
             self.print_error_log(str(e))
         except AttributeError:
             self.print_error_log('Error: Turing machine is unset')
+        except Exception as e:
+            self.print_error_log(str(type(e)))
 
     def on_run_until_halt_clicked(self):
         try:
@@ -180,9 +177,9 @@ class GUI(QtGui.QWidget):
                 try:
                     while not self.turing_machine.is_at_halt_state():
                         self.turing_machine.run_step()
-                except tmexceptions.UnsetTapeException as e:
+                except TapeNotSetException as e:
                     self.print_error_log(str(e))
-                except tmexceptions.UnknownTransitionException as e:
+                except UnknownTransitionException as e:
                     self.print_error_log(str(e))
         except AttributeError:
             self.print_error_log('Error: Turing machine is unset')
@@ -229,6 +226,12 @@ class GUI(QtGui.QWidget):
     #
     # 'Private'
     #
+
+    def _init_icon(self):
+        data = pkgutil.get_data('resources', 'icon.png')
+        pix_map = QtGui.QPixmap()
+        pix_map.loadFromData(data)
+        self.setWindowIcon(QtGui.QIcon(pix_map))
 
     def _init_tape(self):
         self.tape_label = QtGui.QLabel('Tape', self)
@@ -352,9 +355,9 @@ class TuringMachineObserver(BaseTuringMachineObserver):
 
         self.gui.print_info_log('Writen Symbol: ' + str(writen_symbol))
 
-        if movement == tm.TuringMachine.MOVE_LEFT:
+        if movement == TuringMachine.MOVE_LEFT:
             self.gui.print_info_log('Head moved to the left')
-        elif movement == tm.TuringMachine.MOVE_RIGHT:
+        elif movement == TuringMachine.MOVE_RIGHT:
             self.gui.print_info_log('Head moved to the right')
         else:
             self.gui.print_info_log('Head remains at the same position')

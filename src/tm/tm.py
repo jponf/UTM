@@ -3,12 +3,10 @@
 
 
 import copy
-import inspect
-
 from abc import ABCMeta, abstractmethod
 
-from tmexceptions import HaltStateException, InvalidSymbolException, \
-                         UnknownTransitionException, UnsetTapeException
+from tm.exceptions import HaltStateException, InvalidSymbolException, \
+                          UnknownTransitionException, TapeNotSetException
 
 
 # TODO: rewrite doc
@@ -89,10 +87,10 @@ class TuringMachine:
               symbol, raises UnknownTransitionException
         """
         if self.is_at_halt_state():
-            raise HaltStateException('Current state is halt state')
+            raise HaltStateException("Current state is halt state")
         if self._tape is None:
-            raise UnsetTapeException(
-                'Tape must be set before perform an step')
+            raise TapeNotSetException(
+                "Tape must be set before perform an step")
                 
         cur = (self._cur_state, self._tape[self._head])
         for obs in self._observers:
@@ -315,9 +313,9 @@ class TuringMachine:
         """Attach an observer to this Turing Machine
         """
         # Observer must have the following method
-        if not isinstance(observer, TuringMachineObserver):
-            raise TypeError(
-                "Observer must be subclass of TuringMachineObserver")
+        # if not isinstance(observer, BaseTuringMachineObserver):
+        #    raise TypeError(
+        #        "Observer must be subclass of BaseTuringMachineObserver")
         
         if observer not in self._observers:
             self._observers.append(observer)
