@@ -60,13 +60,12 @@ class GUI(QtGui.QWidget):
 
         self.parser = TuringMachineParser()
         self.turing_machine = None
+        self.main_vbox = QtGui.QVBoxLayout(self)
 
     def init_gui(self):
         # Configure window
         self.setMinimumSize(GUI.DEF_WIDTH, GUI.DEF_HEIGHT)   
         self.setWindowTitle(__program__)
-
-        self.main_vbox = QtGui.QVBoxLayout(self)
 
         # Set GUI icon
         self._init_icon()
