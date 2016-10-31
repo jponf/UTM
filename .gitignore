@@ -5,3 +5,8 @@
 # Build and Dist files
 build/
 dist/
+
+# IntelliJ files
+.idea/
+*.iml
+

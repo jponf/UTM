@@ -144,7 +144,7 @@ class TuringMachine:
             if max_steps:
                 try:
     
-                    for i in xrange(max_steps):
+                    for i in range(max_steps):
                         self.step()
                     return  1
                 except tmexceptions.HaltStateException:
@@ -387,13 +387,13 @@ class TuringMachine:
         if not hasattr(observer, 'onHeadMoved'):
             raise Exception('Observer must have an onHeadMoved method')
         # onStepStart and onStepEnd must accept the following amount of parameters
-        if not _getNumArguments(observer.onStepStart) == 2:
+        if not _getNumArguments(observer.on_step_start) == 2:
             raise Exception('Observer onStepStart method must have 2 parameters')    
-        if not _getNumArguments(observer.onStepEnd) == 3:
+        if not _getNumArguments(observer.on_step_end) == 3:
             raise Exception('Observer onStepEnd method must have 3 parameters')    
-        if not _getNumArguments(observer.onTapeChanged) == 1:
+        if not _getNumArguments(observer.on_tape_changed) == 1:
             raise Exception('Observer onTapeChanged method must have 1 parameters')    
-        if not _getNumArguments(observer.onHeadMoved) == 2:
+        if not _getNumArguments(observer.on_head_moved) == 2:
             raise Exception('Observer onHeadMoved method must have 2 parameters')    
         
         if observer not in self._observers:
@@ -453,7 +453,7 @@ class TuringMachine:
         if not self._fstates.issubset(self._states):
             raise Exception('Final states are not a subset of states')
 
-        for k, v in self._trans_function.iteritems():
+        for k, v in self._trans_function.items():
             if len(k) != 2 or len(v) != 3: 
                 raise Exception('Invalid format in transition %s -> %s' %
                                 (str(k), str(v)))
@@ -516,7 +516,7 @@ def _getNumArguments(func):
 # Test class
 if __name__ == '__main__':
 
-    print 'Turing Machine class Test'
+    print('Turing Machine class Test')
 
     hstate = 'HALT'
     states = set([1,2, hstate])
@@ -540,48 +540,48 @@ if __name__ == '__main__':
         tm = TuringMachine(states, in_alphabet, tape_alphabet, trans_function,
                         istate, fstates, hstate, blank)
     except Exception as e:
-        print 'Error:', e
+        print('Error:', e)
 
-    print 'Adding state 3 to the machine states'
+    print('Adding state 3 to the machine states')
     states.add(3)
 
     tm = TuringMachine(states, in_alphabet, tape_alphabet, trans_function,
                         istate, fstates, hstate, blank)
 
-    print 'Turing Machine'
-    print tm
+    print('Turing Machine')
+    print(tm)
     
-    print '\nSet Tape'
+    print('\nSet Tape')
     tape = [1,0,1,0,0,1,0,3]
     try:
         tm.setTape(tape)
     except tmexceptions.InvalidSymbolException as e:
-        print 'Error', e
+        print('Error', e)
         
-    print 'Removing state 3 from the tape'
+    print('Removing state 3 from the tape')
     
     tape = [1,0,0,0,0,1]
     tm.setTape(tape)
     for i in tm.getTapeIterator():
-        print i,
-    print
+        print(i, end=' ')
+    print()
 
-    print '\nCheck words'
-    print 'Is word 1010 accepted?', tm.isWordAccepted([1,0,1,0])
-    print 'Is word 1000 accepted?', tm.isWordAccepted([1, 0, 0, 0])
+    print('\nCheck words')
+    print('Is word 1010 accepted?', tm.isWordAccepted([1,0,1,0]))
+    print('Is word 1000 accepted?', tm.isWordAccepted([1, 0, 0, 0]))
     
-    print '\nTape after checks (Should be the old set values)'
+    print('\nTape after checks (Should be the old set values)')
     for i in tm.getTapeIterator():
-        print i,
-    print
+        print(i, end=' ')
+    print()
 
-    print '\nRunning tm until halt state or undefined transition'
-    print 'Run status code:', tm.run()
-    print 'Expected tape symbols:', 0, 1, 1, 1, 1, 1, blank
-    print ' Tape after execution:',
+    print('\nRunning tm until halt state or undefined transition')
+    print('Run status code:', tm.run())
+    print('Expected tape symbols:', 0, 1, 1, 1, 1, 1, blank)
+    print(' Tape after execution:', end=' ')
     for i in tm.getTapeIterator():
-        print i,
-    print
+        print(i, end=' ')
+    print()
     
     
     

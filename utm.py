@@ -9,27 +9,29 @@ import tmparser
 import tmexceptions
 import highlighters
 
-
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
 
 __prog__='Universal Turing Machine Simulator'
 
 
-#
-#
+# UTM Main
+##############################################################################
+
 def main():
 
     # Initialized the qt application    
     app = QtGui.QApplication(sys.argv)    
     gui = GUI()
-    gui.initGUI()
-    gui.installHandlers()    
+    gui.init_GUI()
+    gui.install_handlers()
     gui.show()    
     sys.exit(app.exec_())
 
-#
-#
+
+# UTM Qt GUI
+##############################################################################
+
 class GUI(QtGui.QWidget):
     
     TAPE_SIZE = 31
@@ -44,18 +46,14 @@ class GUI(QtGui.QWidget):
     
     # Tape style(s)
     TAPE_HEAD_STYLE = 'QLineEdit { border: 2px solid red; background: white;}'
-        
-    #
-    #
+
     def __init__(self):
         super(GUI, self).__init__()
         # Turing machine and Turing machine parser
         self.parser = tmparser.TuringMachineParser()
         self.turing_machine = None
-        
-    #
-    #
-    def initGUI(self):
+
+    def init_GUI(self):
         
         # Configure window
         self.setMinimumSize(GUI.DEF_WIDTH, GUI.DEF_HEIGHT)   
@@ -65,239 +63,185 @@ class GUI(QtGui.QWidget):
         self.main_vbox = QtGui.QVBoxLayout(self)
         
         # Add Tape widgets
-        self._initTape()        
+        self._init_tape()
         # Add log text box
-        self._initLogArea()
+        self._init_log_area()
         
         # Add controls
-        self._initControlArea()
+        self._init_control_area()
         
         self.resize(GUI.DEF_WIDTH, GUI.DEF_HEIGHT)
-        
-        
-    #
-    #
-    def installHandlers(self):
-        self.set_tm_btn.clicked.connect(self.onSetTuringMachineClicked)
-        self.set_tape_btn.clicked.connect(self.onSetTapeClicked)
-        self.run_step_btn.clicked.connect(self.onRunStepClicked)
-        self.run_all_btn.clicked.connect(self.onRunUntilHaltClicked)  
-        self.src_load_btn.clicked.connect(self.onLoadClicked)
-        self.src_save_btn.clicked.connect(self.onSaveClicked)
-        self.clear_log_btn.clicked.connect(self.onClearLogClicked)
-        self.print_all_tape_btn.clicked.connect(self.onPrintAllTape)
-        
-        
+
+    def install_handlers(self):
+        self.set_tm_btn.clicked.connect(self.on_set_turing_machine_clicked)
+        self.set_tape_btn.clicked.connect(self.on_set_tape_clicked)
+        self.run_step_btn.clicked.connect(self.on_run_step_clicked)
+        self.run_all_btn.clicked.connect(self.on_run_until_halt_clicked)
+        self.src_load_btn.clicked.connect(self.on_load_clicked)
+        self.src_save_btn.clicked.connect(self.on_save_clicked)
+        self.clear_log_btn.clicked.connect(self.on_clear_log_clicked)
+        self.print_all_tape_btn.clicked.connect(self.on_print_all_tape)
+
     #
     # QtGui event handlers
     #
-    
-    #
-    #
-    def onSetTuringMachineClicked(self):
-        
-        tmstr = str(self.src_textbox.toPlainText())
+
+    def on_set_turing_machine_clicked(self):
+        tm_str = str(self.src_textbox.toPlainText())
         try:
             self.parser.clean()
-            self.parser.parseString(tmstr)
+            self.parser.parseString(tm_str)
             self.turing_machine = self.parser.create()
             self.turing_machine.attachObserver(self)
             
-            self._printInfoLog('Turing machine created')
-            self._printInfoLog('Current state: ' + 
-                                str(self.turing_machine.getCurrentState()))
+            self._print_info_log('Turing machine created')
+            self._print_info_log('Current state: ' +
+                                 str(self.turing_machine.getCurrentState()))
                                 
-            #sys.stderr.write(str(self.turing_machine) + '\n')
-        except Exception, e:
-            self._printErrorLog('Error: %s' % str(e))
-            
-    #
-    #
-    def onSetTapeClicked(self):
-        tapestr = str(self.tape_textbox.toPlainText())
-        if self.turing_machine != None:
-            self.turing_machine.setTape(tapestr)
+            # sys.stderr.write(str(self.turing_machine) + '\n')
+        except Exception as e:
+            self._print_error_log('Error: %s' % str(e))
+
+    def on_set_tape_clicked(self):
+        tape_str = str(self.tape_textbox.toPlainText())
+        if self.turing_machine is not None:
+            self.turing_machine.setTape(tape_str)
             self.turing_machine.setAtInitialState()
-            self._printInfoLog('Tape value established')
+            self._print_info_log('Tape value established')
         else:
-            self._printErrorLog('Error: The Turing machine must be set before'
-                                ' set the tape')
-            
-    #
-    #
-    def onRunStepClicked(self):
-        
+            self._print_error_log("Error: The Turing machine must be set"
+                                  " before setting the tape")
+
+    def on_run_step_clicked(self):
         try:
             self.turing_machine.step()
-            
-        except tmexceptions.HaltStateException, e:
-            self._printErrorLog(str(e))
-            
-        except tmexceptions.UnsetTapeException, e:
-            self._printErrorLog(str(e))
-            
-        except tmexceptions.UnknownTransitionException, e:
-            self._printErrorLog(str(e))
-            
+        except tmexceptions.HaltStateException as e:
+            self._print_error_log(str(e))
+        except tmexceptions.UnsetTapeException as e:
+            self._print_error_log(str(e))
+        except tmexceptions.UnknownTransitionException as e:
+            self._print_error_log(str(e))
         except AttributeError:
-            self._printErrorLog('Error: Turing machine is unset')
-            
-    #
-    #            
-    def onRunUntilHaltClicked(self):
-        
+            self._print_error_log('Error: Turing machine is unset')
+
+    def on_run_until_halt_clicked(self):
         try:
-            
             if self.turing_machine.isAtHaltState():
-                self._printErrorLog('Error: The Turing Machine is on halt state')
-                
+                self._print_error_log('Error: The Turing Machine is on halt state')
             else:
-                self._printInfoLog('---------- Run Until Halt ----------')
+                self._print_info_log('---------- Run Until Halt ----------')
                 
                 try:
                     while not self.turing_machine.isAtHaltState():
                         self.turing_machine.step()
-                    
-                except tmexceptions.UnsetTapeException, e:
-                    self._printErrorLog(str(e))
-                    
-                except tmexceptions.UnknownTransitionException, e:
-                    self._printErrorLog(str(e))
-                
+                except tmexceptions.UnsetTapeException as e:
+                    self._print_error_log(str(e))
+                except tmexceptions.UnknownTransitionException as e:
+                    self._print_error_log(str(e))
         except AttributeError:
-            self._printErrorLog('Error: Turing machine is unset')
-    #
-    #
-    def onLoadClicked(self):
-        
+            self._print_error_log('Error: Turing machine is unset')
+
+    def on_load_clicked(self):
         fname = QtGui.QFileDialog.getOpenFileName(self, 'Load file',
                                                   os.path.expanduser('~'))
-                                                  
         if fname:
             f = open(fname, 'r')
             fstr = f.read()
             self.src_textbox.setPlainText(fstr)
             f.close()
             
-            self._printInfoLog('Loaded file: %s' % fname)            
-    #
-    #
-    def onSaveClicked(self):
-        
+            self._print_info_log('Loaded file: %s' % fname)
+
+    def on_save_clicked(self):
         fname = QtGui.QFileDialog.getSaveFileName(self, 'Save file',
                                                   os.path.expanduser('~'))
-                                                  
         if fname:
             f = open(fname, 'w')
             fstr = str(self.src_textbox.toPlainText())
             f.write(fstr)
             f.close()
-            
-            self._printInfoLog('Saved file: %s' % fname)
-            
-    #
-    #
-    def onClearLogClicked(self):
+            self._print_info_log('Saved file: %s' % fname)
+
+    def on_clear_log_clicked(self):
     
         self.log_textbox.clear()
-        
-    #
-    #
-    def onPrintAllTape(self):
+
+    def on_print_all_tape(self):
         if self.turing_machine:
             try:
                 tape_value = ' '.join(self.turing_machine.getTapeIterator())
-                self._printInfoLog('***************************************')
-                self._printInfoLog('Tape Values:')
-                self._printStrikingInfoLog(tape_value)
-                self._printInfoLog('***************************************')
-            except Exception, e:
-                self._printErrorLog(str(e))
+                self._print_info_log('***************************************')
+                self._print_info_log('Tape Values:')
+                self._print_striking_info_log(tape_value)
+                self._print_info_log('***************************************')
+            except Exception as e:
+                self._print_error_log(str(e))
         else:
-            self._printErrorLog('Error: The Turing Machine must be set '
-                                'before print the tape')
-        
-            
+            self._print_error_log('Error: The Turing Machine must be set '
+                                  'before print the tape')
+
     #
     # Turing Machine observer methods
     #
 
-    #
-    #
-    def onStepStart(self, current_state, current_tape_symbol):
-        self._printInfoLog('+++++++++++++++++++++++++++++++++++++++++++++++')
-        self._printInfoLog('Started step at state "%s" with tape symbol "%s"'
-                            % ( str(current_state), str(current_tape_symbol)))
-    #
-    #
-    def onStepEnd(self, new_state, writed_symbol, movement):
-        self._printInfoLog('-----------------------------------------------')
+    def on_step_start(self, current_state, current_tape_symbol):
+        self._print_info_log('+++++++++++++++++++++++++++++++++++++++++++++++')
+        self._print_info_log('Started step at state "%s" with tape symbol "%s"'
+                             % (str(current_state), str(current_tape_symbol)))
+
+    def on_step_end(self, new_state, writen_symbol, movement):
+        self._print_info_log('-----------------------------------------------')
         
-        self._printInfoLog('Writed Symbol: ' + str(writed_symbol) )
+        self._print_info_log('Writen Symbol: ' + str(writen_symbol))
         
         if movement == tm.TuringMachine.MOVE_LEFT:            
-            self._printInfoLog('Head moved to the left')
+            self._print_info_log('Head moved to the left')
         elif movement == tm.TuringMachine.MOVE_RIGHT:
-            self._printInfoLog('Head moved to the right')            
+            self._print_info_log('Head moved to the right')
         else:
-            self._printInfoLog('Head remains at the same position')
+            self._print_info_log('Head remains at the same position')
                    
-        self._printInfoLog('Current state: ' + str(new_state) + 
-            (' (FINAL)' if self.turing_machine.isAtFinalState() else '') ) 
-    
-    #
-    #
-    def onTapeChanged(self, head_pos):
-        self._redrawTape(head_pos)
-    
-    #
-    #
-    def onHeadMoved(self, head_pos, old_head_pos):
-        self._redrawTape(head_pos)
+        self._print_info_log('Current state: ' + str(new_state) +
+                             (' (FINAL)' if self.turing_machine.isAtFinalState() else ''))
 
-        
+    def on_tape_changed(self, head_pos):
+        self._redraw_tape(head_pos)
+
+    def on_head_moved(self, head_pos, old_head_pos):
+        self._redraw_tape(head_pos)
+
     #
     # 'Private'
     #
-    
-    #
-    # Creates and adds the tape widgets
-    def _initTape(self):
-        self.tape_label = QtGui.QLabel('Tape', self)   
-        
+
+    def _init_tape(self):
+        self.tape_label = QtGui.QLabel('Tape', self)
         self.tape_hbox = QtGui.QHBoxLayout()
                 
-#        self.tape_lbutton = QtGui.QPushButton('<', self)
-#        self.tape_rbutton = QtGui.QPushButton('>', self)        
-        self.tape_textboxes = self._createTape()
-        
-        
-#        self.tape_hbox.addWidget(self.tape_lbutton)
+        # self.tape_lbutton = QtGui.QPushButton('<', self)
+        # self.tape_rbutton = QtGui.QPushButton('>', self)
+        self.tape_textboxes = self._create_tape()
+
+        # self.tape_hbox.addWidget(self.tape_lbutton)
         for txbx in self.tape_textboxes:
             self.tape_hbox.addWidget(txbx)
-#        self.tape_hbox.addWidget(self.tape_rbutton)
-        
-        
+        # self.tape_hbox.addWidget(self.tape_rbutton)
+
         self.main_vbox.addWidget(self.tape_label, 0, Qt.AlignCenter)        
         self.main_vbox.addLayout(self.tape_hbox, 1)
         self.main_vbox.addSpacing(GUI.VSPACING)
-        
-        
-    #
-    #
-    def _createTape(self):
-        tptx = [QtGui.QLineEdit(self) for i in xrange(GUI.TAPE_SIZE)]
-        for txbx in tptx:            
-            txbx.setReadOnly(True)
-            txbx.setFocusPolicy(Qt.NoFocus)
-            txbx.setAlignment(Qt.AlignHCenter)
+
+    def _create_tape(self):
+        tape_txt_boxes = [QtGui.QLineEdit(self) for _ in range(GUI.TAPE_SIZE)]
+        for txt_box in tape_txt_boxes:
+            txt_box.setReadOnly(True)
+            txt_box.setFocusPolicy(Qt.NoFocus)
+            txt_box.setAlignment(Qt.AlignHCenter)
             
-        tptx[GUI.TAPE_HEAD].setStyleSheet(GUI.TAPE_HEAD_STYLE)
-        return tptx
-        
-    #
-    #
-    def _initLogArea(self):
+        tape_txt_boxes[GUI.TAPE_HEAD].setStyleSheet(GUI.TAPE_HEAD_STYLE)
+        return tape_txt_boxes
+
+    def _init_log_area(self):
         
         log_vbox = QtGui.QVBoxLayout()
                 
@@ -321,16 +265,14 @@ class GUI(QtGui.QWidget):
         # Add all the previous stuff to the window layout
         self.main_vbox.addLayout(log_vbox, 1)
         self.main_vbox.addSpacing(GUI.VSPACING)
-        
-    #
-    #
-    def _initControlArea(self):
+
+    def _init_control_area(self):
         self.ctrl_hbox = QtGui.QHBoxLayout()
         
         # Add source text box and load/save buttons
         ctrl_llabel = QtGui.QLabel("TM Source Code", self)
         self.src_textbox = QtGui.QTextEdit(self)
-        highlighters.TMSourceHightlighter(self.src_textbox, "Classic" )
+        highlighters.TMSourceHighlighter(self.src_textbox, "Classic")
         self.src_load_btn = QtGui.QPushButton('Load', self)
         self.src_save_btn = QtGui.QPushButton('Save', self)
         
@@ -367,31 +309,27 @@ class GUI(QtGui.QWidget):
         self.ctrl_hbox.addSpacing(GUI.HSPACING)
         self.ctrl_hbox.addLayout(self.ctrl_rvbox, 1)
         self.main_vbox.addLayout(self.ctrl_hbox, 2)
-        
-    #
-    #
-    def _redrawTape(self, head_pos):
+
+    def _redraw_tape(self, head_pos):
         blank = self.turing_machine.getBlankSymbol()        
         
         sym = self.turing_machine.getSymbolAt(head_pos)
         self.tape_textboxes[GUI.TAPE_HEAD].setText('' if sym == blank 
                                                     else str(sym))
         
-        for i in xrange(1, GUI.TAPE_HEAD + 1):
+        for i in range(1, GUI.TAPE_HEAD + 1):
             txtbx_index = GUI.TAPE_HEAD - i
             tape_index = head_pos - i
             sym = self.turing_machine.getSymbolAt(tape_index)
             self.tape_textboxes[txtbx_index].setText('' if sym == blank
                                                     else str(sym))
                                 
-        for inc, i in enumerate(xrange(GUI.TAPE_HEAD + 1, GUI.TAPE_SIZE)):
+        for inc, i in enumerate(range(GUI.TAPE_HEAD + 1, GUI.TAPE_SIZE)):
             tape_index = head_pos + inc + 1
             sym = self.turing_machine.getSymbolAt(tape_index)
             self.tape_textboxes[i].setText('' if sym == blank else str(sym))
-                                                  
-    #
-    #
-    def _printErrorLog(self, error):
+
+    def _print_error_log(self, error):
         """
         Prints a message on the log_textbox
         Text Color: RED
@@ -399,10 +337,8 @@ class GUI(QtGui.QWidget):
         self.log_textbox.setTextColor(Qt.red)
         self.log_textbox.setFontWeight( QtGui.QFont.Normal )
         self.log_textbox.append(error)
-    
-    #
-    #        
-    def _printInfoLog(self, msg):
+
+    def _print_info_log(self, msg):
         """
         Prints a message on the log_textbox
         Text Color: BLACK
@@ -410,10 +346,8 @@ class GUI(QtGui.QWidget):
         self.log_textbox.setTextColor(Qt.black)
         self.log_textbox.setFontWeight( QtGui.QFont.Normal )
         self.log_textbox.append(msg)
-        
-    #
-    #
-    def _printStrikingInfoLog(self, msg):
+
+    def _print_striking_info_log(self, msg):
         """
         Prints a message on the log_textbox makeing it more visible than a
         normal log
@@ -421,7 +355,7 @@ class GUI(QtGui.QWidget):
         self.log_textbox.setTextColor( Qt.darkBlue )
         self.log_textbox.setFontWeight( QtGui.QFont.Bold )
         self.log_textbox.append(msg)
-#
-#
+
+
 if __name__ == '__main__':    
     main()

@@ -257,6 +257,6 @@ if __name__ == '__main__':
     
     tm = parser.create()
     
-    print tm
+    print(tm)
     
     

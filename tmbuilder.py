@@ -159,7 +159,7 @@ class TuringMachineBuilder:
         # transition otherwise delete it from the list of states
         if self.hasHaltState():
             old_remains = False
-            for k, v in self._trans_function.iteritems():
+            for k, v in self._trans_function.items():
                 if k[0] == self._haltstate or v[0] == self._haltstate:
                     old_remains = True
                     break
@@ -227,7 +227,7 @@ if __name__ == '__main__':
     tmb.setInitialState(1)
     tmb.addFinalState(2)
     
-    print tmb.create()
+    print(tmb.create())
     
 
     
