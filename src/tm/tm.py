@@ -205,13 +205,13 @@ class TuringMachine:
         return self._head
 
     def get_tape_iterator(self):
-        """
-        Returns an iterator of the internal tape
+        """Returns an iterator of the internal tape
         """
         if self._tape:
             return iter(self._tape)
         else:
-            raise Exception('Tape must be set before try to get its iterator')
+            raise TapeNotSetException(
+                "Tape must be set before getting its iterator")
 
     def get_executed_steps_counter(self):
         """
@@ -239,47 +239,33 @@ class TuringMachine:
         return self._tape is not None
 
     def is_word_accepted(self, word, max_steps=None):
+        """Tests if the given word is accepted by this turing machine.
+
+        :param word: An iterable str/list/tuple/... of symbols.
+        :param max_steps: Limit of steps to test if the word is accepted.
+
+        :return: True if accepted, False otherwise.
         """
-        Return values are:
-            True - Ends by halt state or undefined transition at a final state
-            False - Ends by halt state or undefined transition at a non final state
-            None - Ends by max_steps
-        """
-        
-        old_tape = self._tape
+        old_tape, old_head = self._tape, self._head
         old_state = self._cur_state
-        old_head = self._head
         
         self.set_tape(word)
-        end_cond = self.run(max_steps)
-        self._tape = old_tape
-        
-        if end_cond == 0 or end_cond == 2:        
-            accepted = self.is_at_final_state()
-        else:
-            accepted = None
-        
-        self._tape = old_tape
+        self.run(max_steps)
+        accepted = self.is_at_final_state()
+
+        self._tape, self._head = old_tape, old_head
         self._cur_state = old_state
-        self._head = old_head
+
         
         return accepted
 
     def set_tape(self, tape, head_pos=0):
-        """
-        setTape(tape:[], head_pos:int)
+        """Sets tape content and head position.
 
-        Set tape and head position
-
-        Head position takes as default value 0
         If head position is negative or greater than tape length the tape is
-        filled with blanks
-        
-        If tape contains an invalid symbol raises an InvalidSymbolException
-        
-        WARNING: 
-            It is recommended that the tape symbols are immutable types
-            Does not reset the executed steps counter
+        filled with blanks.
+
+        :raise InvalidSymbolException: if tape contains an invalid symbol.
         """
         
         for s in tape:
@@ -305,23 +291,21 @@ class TuringMachine:
             obs.on_tape_changed(head_pos)
 
     def set_at_initial_state(self):
-        """Forces the machine state to be the initial state
-        """
+        """Forces the machine state to be the initial state."""
         self._cur_state = self._init_state
 
     def attach_observer(self, observer):
-        """Attach an observer to this Turing Machine
-        """
+        """Attaches an observer to this Turing Machine."""
         # Observer must have the following method
-        # if not isinstance(observer, BaseTuringMachineObserver):
-        #    raise TypeError(
-        #        "Observer must be subclass of BaseTuringMachineObserver")
+        if not isinstance(observer, BaseTuringMachineObserver):
+            raise TypeError(
+                "Observer must be subclass of BaseTuringMachineObserver")
         
         if observer not in self._observers:
             self._observers.append(observer)
 
     def detach_observer(self, observer):
-        """Remove the specified observer
+        """Removes the specified observer
         """
         try:
             self._observers.remove(observer)
