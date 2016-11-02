@@ -8,11 +8,11 @@
 uname_str=`uname`
 arch_str=`uname -m`
 
-if [ $uname_str = "Linux" ]; then
+if [ "${uname_str}" = "Linux" ]; then
     platform="linux"
-elif [ "$uname_str" = "FreeBSD" ]; then
+elif [ "${uname_str}" = "FreeBSD" ]; then
     platform="bsd"
-elif [ "$uname_str" = "Darwin" ]; then
+elif [ "${uname_str}" = "Darwin" ]; then
     platform="mac"
 else
     platform="unknown"

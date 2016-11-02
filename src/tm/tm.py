@@ -256,7 +256,6 @@ class TuringMachine:
         self._tape, self._head = old_tape, old_head
         self._cur_state = old_state
 
-        
         return accepted
 
     def set_tape(self, tape, head_pos=0):

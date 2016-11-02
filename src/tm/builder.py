@@ -4,22 +4,13 @@ from tm.tm import TuringMachine
 
 
 class TuringMachineBuilder:
-    """
-    Creates a turing machine step by step by retrieving all the necessary 
-    information.
+    """Creates a turing machine with the specified attributes.
     
-    By default (can be specified) sets the halt state to 'HALT and the
-    blank symbol to '#'
+    By default sets the halt state to 'HALT and the blank symbol to '#'.
     """
     
     def __init__(self):
-        """
-        Initialize a new TuringMachineBuilder with the specified haltstate and
-        blank symbol.
-        
-        haltstate takes as default value 'HALT'
-        blnak takes as default value '#' and must be one char length
-        """
+        """Initialize a new TuringMachineBuilder."""
         self._states = set()
         self._in_alphabet = set()
         self._trans_function = {}
@@ -30,9 +21,7 @@ class TuringMachineBuilder:
         self._halt_state = None
 
     def clean(self):
-        """
-        Clear all the previous stored data
-        """
+        """Clear all the previous stored data."""
         self._states = set()
         self._in_alphabet = set()
         self._trans_function = {}
@@ -43,23 +32,16 @@ class TuringMachineBuilder:
         self._halt_state = None
 
     def add_transition(self, state, symbol, new_state, new_symbol, movement):
+        """Adds the transition.
+
+        :param state: State from which the transition starts.
+        :param symbol: Symbol that triggers the transition.
+        :param new_state: Machine's state after the transition.
+        :param new_symbol: Symbol to write on the tape.
+        :param movement: Direction in which the tape has to be moved.
+
+        :raise Exception: if symbols are longer than one character.
         """
-        addTransition(state, symbol, new_state, new_symbol, movement)
-                
-        Adds the transition:
-            From state,symbol To new_state writing new_symbol at the current 
-            position and moving the head in movement direction
-             
-        - state: something that represents a state, must be hashable
-        - symbol: something that represents a symbol, must be hashable
-        - new_state: something that represents a state, must be hashable
-        - new_symbol: something that represents a symbol, must be hashable
-        - movement: TuringMachine.MOVE_LEFT or TuringMachine.MOVE_RIGHT or 
-                    TuringMachine.NON_MOVEMENT
-                    
-        Raise Exception if symbols have more than one char length
-        """
-        
         if movement not in TuringMachine.HEAD_MOVEMENTS:        
             raise Exception('Invalid movement')
         
@@ -83,61 +65,49 @@ class TuringMachineBuilder:
                                                  movement)
 
     def add_final_state(self, state):
-        """
-        Adds the specified state to the set of final states
-        """
+        """Adds the give state to the set of final states."""
         if state not in self._states:
             self._states.add(state)
         if state not in self._final_states:
             self._final_states.add(state)
 
     def set_initial_state(self, state):
-        """
-        Set the specified state as the initial. Mandatory operation
-        """
+        """Sets the given state as the initial."""
         if state not in self._states:
             self._states.add(state)
         self._init_state = state
 
     def has_initial_state(self):
-        """
-        Returns True if the initial state was specified on a previous call
-        to setInitialState
+        """Tests if the initial state has been set.
+
+        :return: True if it has been set, False otherwise.
         """
         return self._init_state is not None
 
     def has_halt_state(self):
-        """
-        Returns True if the halt state was specified on a previous call to
-        setHaltState
+        """Tests if the halt state has been set.
+
+        :return: True if it has been set, False otherwise.
         """
         return self._halt_state is not None
 
     def has_blank_symbol(self):
-        """
-        Returns True if the halt state was specified on a previous call to
-        setBlankSymbol
+        """Tests if the blank symbol has been set.
+
+        :return: True if it has been set, False otherwise.
         """
         return self._blank is not None
 
     def set_blank_symbol(self, blank_sym):
-        """
-        Specifies a new blank symbol
-            - The blank symbol must be one char length
-            
-        Raise Exception if blank_sym has more than one char length
-        """
+        """Sets the blank symbol."""
         if not blank_sym or len(blank_sym) > 1:
             raise Exception('Symbol must be one char length')
             
         self._blank = blank_sym
 
-    def set_halt_state(self, haltstate):
-        """
-        Specifies a new halt state
-        """
-        
-        # If there are a previous halt state. Check if it appears in some
+    def set_halt_state(self, halt_state):
+        """Sets the halt state."""
+        # If there is a previous halt state. Check if it appears in some
         # transition otherwise delete it from the list of states
         if self.has_halt_state():
             old_remains = False
@@ -149,19 +119,16 @@ class TuringMachineBuilder:
             if not old_remains:
                 self._states.remove(self._halt_state)
                      
-        self._halt_state = haltstate
+        self._halt_state = halt_state
         self._states.add(self._halt_state)
 
     def create(self):
-        """
-        Creates a turing machine instance with the collected information.
-        
-        Raises an Exception if:
-            The initial state remains unset
-            The halt state remains unset
-            The blank symbol remains unset
-        
-        At this point the tape_alphabet is set to be: in_alphabet U {blank}
+        """Creates a new turing machine instance using the previously set data
+
+        The input alphabet is automatically set from the specified transitions
+        plus the blank symbol.
+
+        :raise Exception: If necessary elements are not set.
         """
         if not self.has_initial_state():
             raise Exception('It is necessary to specify an initial state')
@@ -181,10 +148,6 @@ class TuringMachineBuilder:
                              self._blank)
 
     def get_halt_state(self):
-        """
-        Returns the halt state specified or assigned by default on the 
-        initialization of this Builder
-        """
         return self._halt_state
             
 
