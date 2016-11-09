@@ -1,12 +1,33 @@
 # -*- coding: utf-8 -*-
 
-import logging
 import re
-import sys
 
 from tm.tm import TuringMachine
 from tm.builder import TuringMachineBuilder
 
+
+# Parser regular expressions
+##############################################################################
+
+_MOVE_RIGHT = '>'
+_MOVE_LEFT = '<'
+_NON_MOVEMENT = '_'
+
+_COMMENT_RE = re.compile(r'[ ]*%\s*')
+_HALT_RE = re.compile(r'[ ]*HALT[ ]+(?P<state>\w+)\s*$')
+_INIT_RE = re.compile(r'[ ]*INITIAL[ ]+(?P<state>\w)\s*$')
+_FINAL_RE = re.compile(r'[ ]*FINAL[ ]+(?P<state>\w+)\s*$')
+
+_BLANK_SYM_RE = re.compile(r'[\s]*BLANK[\s]+(?P<symbol>.)\s*$')
+
+_TRANSITION_RE = re.compile(
+    r'\s*(?P<state>\w+)\s*,\s*(?P<symbol>.)\s*->\s*(?P<new_state>\w+)\s*'
+    r',\s*(?P<new_symbol>.)\s*,\s*(?P<movement>[%s%s%s])\s*$' %
+    (_MOVE_LEFT, _MOVE_RIGHT, _NON_MOVEMENT))
+
+
+# Parser Class
+##############################################################################
 
 class TuringMachineParser:
     """Provides methods to parse a Turing Machine.
@@ -25,27 +46,8 @@ class TuringMachineParser:
     be on a standalone line
     """
 
-    MOVE_RIGHT = '>'
-    MOVE_LEFT = '<'
-    NON_MOVEMENT = '_'
-
     def __init__(self):
         self._builder = TuringMachineBuilder()
-
-        # Regular expressions
-        self._comment_line_re = re.compile('[ ]*%\s*')
-        self._blank_symbol_re = re.compile('[\s]*BLANK[\s]+(?P<symbol>.)\s*$')
-        self._halt_state_re = re.compile('[ ]*HALT[ ]+(?P<state>\w+)\s*$')
-        self._final_state_re = re.compile('[ ]*FINAL[ ]+(?P<state>\w+)\s*$')
-        self._init_state_re = re.compile('[ ]*INITIAL[ ]+(?P<state>\w)\s*$')
-        self._transition_re = re.compile(
-            '\s*(?P<state>\w+)\s*,\s*'
-            '(?P<symbol>.)\s*->\s*'
-            '(?P<nstate>\w+)\s*,\s*'
-            '(?P<nsymbol>.)\s*,\s*'
-            '(?P<movement>[%s%s%s])\s*$' % (TuringMachineParser.MOVE_LEFT,
-                                            TuringMachineParser.MOVE_RIGHT,
-                                            TuringMachineParser.NON_MOVEMENT))
 
     def clean(self):
         """Cleans all the previous parsed data"""
@@ -63,22 +65,11 @@ class TuringMachineParser:
 
         self._parse(text.splitlines())
 
-    def parse_line(self, data):
+    def parse_line(self, line):
         """Parse the given line"""
-        # The most expected expressions are in order:
-        # - Transition
-        # - Comments
-        # - Final States
-        # - Initial State, Halt State, Blank Symbol
-
-        if not self._parse_transition(data):
-            if not self._parse_comment(data):
-                if not self._parse_final_state(data):
-                    if not self._parse_initial_state(data):
-                        if not self._parse_blank_symbol(data):
-                            if not self._parse_halt_state(data):
-                                raise Exception('Unrecognized pattern: %s'
-                                                % data)
+        parsers = map(lambda f: f(self._builder, line), _PARSE_FUNCTIONS)
+        if not any(parsers):
+            raise Exception('Unrecognized pattern: %s' % line)
 
     def create(self):
         """Attempts to create a Turing Machine with the data parsed before the
@@ -88,83 +79,92 @@ class TuringMachineParser:
         """
         return self._builder.create()
 
-    def _parse_comment(self, data):
-        mc = self._comment_line_re.match(data)
-        if mc:
-            return True
-        return False
-
-    def _parse_blank_symbol(self, data):
-        mbs = self._blank_symbol_re.match(data)
-        if mbs:
-            if self._builder.has_blank_symbol():
-                raise Exception('Blank symbol can only be defined once')
-
-            self._builder.set_blank_symbol(mbs.group('symbol'))
-            return True
-
-        return False
-
-    def _parse_halt_state(self, data):
-        mhs = self._halt_state_re.match(data)
-        if mhs:
-            if self._builder.has_halt_state():
-                raise Exception('Halt state can only be defined once')
-
-            self._builder.set_halt_state(mhs.group('state'))
-            return True
-
-        return False
-
-    def _parse_final_state(self, data):
-        mfs = self._final_state_re.match(data)
-        if mfs:
-            self._builder.add_final_state(mfs.group('state'))
-            return True
-
-        return False
-
-    def _parse_initial_state(self, data):
-        mis = self._init_state_re.match(data)
-        if mis:
-            if self._builder.has_initial_state():
-                raise Exception('Initial state can only be defined once')
-
-            self._builder.set_initial_state(mis.group('state'))
-            return True
-
-        return False
-
-    def _parse_transition(self, data):
-        mt = self._transition_re.match(data)
-        if mt:
-            # Filter movement
-            move_sym = mt.group('movement')
-            move = TuringMachine.NON_MOVEMENT
-            if move_sym == TuringMachineParser.MOVE_LEFT:
-                move = TuringMachine.MOVE_LEFT
-            elif move_sym == TuringMachineParser.MOVE_RIGHT:
-                move = TuringMachine.MOVE_RIGHT
-
-            self._builder.add_transition(mt.group('state'),
-                                         mt.group('symbol'),
-                                         mt.group('nstate'),
-                                         mt.group('nsymbol'),
-                                         move)
-            return True
-
-        return False
-
     def _parse(self, parse_data):
-        logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+        reader = ((i, l.strip()) for i, l in enumerate(parse_data, start=1))
+        reader = ((i, l) for i, l in reader if l)
 
-        for line, data in enumerate(parse_data):
-            # The execution flow it's ugly
-            # But personally I hate the idea of have a lot of indentation levels
-
-            if not data:
-                continue
+        for i, l in reader:
             try:
-                self.parse_line(data)
+                self.parse_line(l)
             except Exception as e:
-                raise Exception('Line %d, %s' % (line + 1, str(e)))
+                raise Exception('Line %d, %s' % (i, str(e)))
+
+
+# Parsing utilities
+##############################################################################
+
+def _parse_comment(_, line):
+    return True if _COMMENT_RE.match(line) else False
+
+
+def _parse_blank_symbol(builder, line):
+    m = _BLANK_SYM_RE.match(line)
+    if m:
+        if builder.has_blank_symbol():
+            raise Exception('Blank symbol can only be defined once')
+
+        builder.set_blank_symbol(m.group('symbol'))
+        return True
+
+    return False
+
+
+def _parse_halt_state(builder, line):
+    m = _HALT_RE.match(line)
+    if m:
+        if builder.has_halt_state():
+            raise Exception('Halt state can only be defined once')
+
+        builder.set_halt_state(m.group('state'))
+        return True
+
+    return False
+
+
+def _parse_final_state(builder, line):
+    m = _FINAL_RE.match(line)
+    if m:
+        builder.add_final_state(m.group('state'))
+        return True
+
+    return False
+
+
+def _parse_initial_state(builder, line):
+    m = _INIT_RE.match(line)
+    if m:
+        if builder.has_initial_state():
+            raise Exception('Initial state can only be defined once')
+
+        builder.set_initial_state(m.group('state'))
+        return True
+
+    return False
+
+
+def _parse_transition(builder, line):
+    m = _TRANSITION_RE.match(line)
+    if m:
+        move_sym, move = m.group('movement'), None
+        if move_sym == _MOVE_LEFT:
+            move = TuringMachine.MOVE_LEFT
+        elif move_sym == _MOVE_RIGHT:
+            move = TuringMachine.MOVE_RIGHT
+        elif move_sym == _NON_MOVEMENT:
+            move = TuringMachine.NON_MOVEMENT
+
+        if move is None:
+            raise Exception("Unknown movement %s" % move_sym)
+
+        builder.add_transition(
+            m.group('state'), m.group('symbol'),
+            m.group('new_state'), m.group('new_symbol'), move)
+        return True
+
+    return False
+
+
+_PARSE_FUNCTIONS = (
+    _parse_transition, _parse_comment, _parse_final_state,
+    _parse_initial_state, _parse_blank_symbol, _parse_halt_state
+)
