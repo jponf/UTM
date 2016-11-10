@@ -5,19 +5,37 @@ from unittest import TestCase
 from tm import TuringMachineParser, TuringMachine
 
 
-TEST_STR = '% Start with a comment line\n' \
-           '  % Another comment line\n' \
-           'HALT HALT\n' \
-           'BLANK #\n' \
-           'INITIAL 1\n' \
-           'FINAL 2\n' \
-           '1, 0 -> 2, 1, >\n' \
-           '1, 1 -> 2, 0, > \n' \
-           '2, 0 -> 1, 0, _\n' \
-           ' 2,1->3,1,>\n ' \
-           '3, 0 -> HALT, 0, _\n' \
-           '3, 1 -> HALT, 1, _\n' \
-           '3, # -> HALT, #, _\n'
+TEST_STR = """
+% Start with a comment line
+  % Another comment line
+HALT HALT
+BLANK #
+INITIAL 1
+FINAL 2
+1, 0 -> 2, 1, >
+1, 1 -> 2, 0, >
+2, 0 -> 1, 0, _
+ 2,1->3,1,>
+3, 0 -> HALT, 0, _
+3, 1 -> HALT, 1, _
+3, # -> HALT, #, _
+"""
+
+TEST_UTF8 = """
+% Start with a comment line
+  % Another comment line
+HALT HALT
+BLANK 🕴
+INITIAL 1
+FINAL 2
+1, 0 -> 2, 1, >
+1, 1 -> 2, 0, >
+2, 0 -> 1, 0, _
+ 2,1->3,1,>
+3, 0 -> HALT, 0, _
+3, 1 -> HALT, 1, _
+3, 🕴 -> HALT, 🕴, _
+"""
 
 
 class TestTuringMachineParser(TestCase):
@@ -25,6 +43,14 @@ class TestTuringMachineParser(TestCase):
     def test_parse_string(self):
         parser = TuringMachineParser()
         parser.parse_string(TEST_STR)
+        tm = parser.create()
+
+        self.assertTrue(tm.is_word_accepted('0000'))
+        self.assertFalse(tm.is_word_accepted('1011'))
+
+    def test_parse_utf8(self):
+        parser = TuringMachineParser()
+        parser.parse_string(TEST_UTF8)
         tm = parser.create()
 
         self.assertTrue(tm.is_word_accepted('0000'))

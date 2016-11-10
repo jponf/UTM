@@ -30,17 +30,17 @@ _TRANSITION_RE = re.compile(
 ##############################################################################
 
 class TuringMachineParser:
-    """Provides methods to parse a Turing Machine.
+    """Parses a string or file containing the description of a turing machine
     
     The allowed expressions are:
         
         - empty line
-        - comment line: '% any text that comes after it's ignored'
+        -  comment line: '% any text that comes after it's ignored'
         - initial state: 'INITIAL <state>'        
-        - blank symbol: 'BLANK <symbol>'
-        - final state: 'FINAL <state>'        
-        - halt state: 'HALT <state>'
-        - transition: '<state>, <symbol> -> <new_state>, <new_symbol>, <movement>
+        -  blank symbol: 'BLANK <symbol>'
+        -   final state: 'FINAL <state>'
+        -    halt state: 'HALT <state>'
+        -    transition: '<state>, <symbol> -> <new_state>, <new_symbol>, <movement>
         
     It is not possible to add comments at the end of any line, comments must
     be on a standalone line

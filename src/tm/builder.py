@@ -4,9 +4,7 @@ from tm.tm import TuringMachine
 
 
 class TuringMachineBuilder:
-    """Creates a turing machine with the specified attributes.
-    
-    By default sets the halt state to 'HALT and the blank symbol to '#'.
+    """Incremental creation of a turing machine.
     """
     
     def __init__(self):
