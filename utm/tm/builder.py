@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from tm.tm import TuringMachine
+from utm.tm import TuringMachine
 
 
 class TuringMachineBuilder:
-    """Incremental creation of a turing machine.
-    """
-    
+    """Incremental creation of a turing machine."""
+
     def __init__(self):
         """Initialize a new TuringMachineBuilder."""
         self._states = set()
@@ -14,7 +13,7 @@ class TuringMachineBuilder:
         self._trans_function = {}
         self._init_state = None
         self._final_states = set()
-        
+
         self._blank = None
         self._halt_state = None
 
@@ -25,7 +24,7 @@ class TuringMachineBuilder:
         self._trans_function = {}
         self._init_state = None
         self._final_states = set()
-        
+
         self._blank = None
         self._halt_state = None
 
@@ -40,27 +39,27 @@ class TuringMachineBuilder:
 
         :raise Exception: if symbols are longer than one character.
         """
-        if movement not in TuringMachine.HEAD_MOVEMENTS:        
-            raise Exception('Invalid movement')
-        
-        if (hasattr(symbol, 'len') and len(symbol) > 1) or \
-                (hasattr(new_symbol, 'len') and len(new_symbol) > 1):
-            raise Exception('Symbol length > 1')
-        
+        if movement not in TuringMachine.HEAD_MOVEMENTS:
+            raise Exception("Invalid movement")
+
+        if (hasattr(symbol, "len") and len(symbol) > 1) or (
+            hasattr(new_symbol, "len") and len(new_symbol) > 1
+        ):
+            raise Exception("Symbol length > 1")
+
         if state not in self._states:
             self._states.add(state)
-            
+
         if symbol != self._blank and symbol not in self._in_alphabet:
             self._in_alphabet.add(symbol)
-            
+
         if new_state not in self._states:
             self._states.add(new_state)
-            
+
         if new_symbol != self._blank and new_symbol not in self._in_alphabet:
             self._in_alphabet.add(new_symbol)
-            
-        self._trans_function[(state, symbol)] = (new_state, new_symbol,
-                                                 movement)
+
+        self._trans_function[(state, symbol)] = (new_state, new_symbol, movement)
 
     def add_final_state(self, state):
         """Adds the give state to the set of final states."""
@@ -99,8 +98,8 @@ class TuringMachineBuilder:
     def set_blank_symbol(self, blank_sym):
         """Sets the blank symbol."""
         if not blank_sym or len(blank_sym) > 1:
-            raise Exception('Symbol must be one char length')
-            
+            raise Exception("Symbol must be one char length")
+
         self._blank = blank_sym
 
     def set_halt_state(self, halt_state):
@@ -113,10 +112,10 @@ class TuringMachineBuilder:
                 if k[0] == self._halt_state or v[0] == self._halt_state:
                     old_remains = True
                     break
-                
+
             if not old_remains:
                 self._states.remove(self._halt_state)
-                     
+
         self._halt_state = halt_state
         self._states.add(self._halt_state)
 
@@ -129,41 +128,47 @@ class TuringMachineBuilder:
         :raise Exception: If necessary elements are not set.
         """
         if not self.has_initial_state():
-            raise Exception('It is necessary to specify an initial state')
-            
+            raise Exception("It is necessary to specify an initial state")
+
         if not self.has_blank_symbol():
-            raise Exception('It is necessary to specify the blank symbol')
-            
+            raise Exception("It is necessary to specify the blank symbol")
+
         if not self.has_halt_state():
-            raise Exception('It is necessary to specify the halt state')
+            raise Exception("It is necessary to specify the halt state")
 
         tape_alphabet = set(self._in_alphabet)
         tape_alphabet.add(self._blank)
-        
-        return TuringMachine(self._states, self._in_alphabet, tape_alphabet,
-                             self._trans_function, self._init_state,
-                             self._final_states, self._halt_state,
-                             self._blank)
+
+        return TuringMachine(
+            self._states,
+            self._in_alphabet,
+            tape_alphabet,
+            self._trans_function,
+            self._init_state,
+            self._final_states,
+            self._halt_state,
+            self._blank,
+        )
 
     def get_halt_state(self):
         return self._halt_state
-            
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     tmb = TuringMachineBuilder()
-    
-    tmb.set_blank_symbol('#')
-    tmb.set_halt_state('HALT')
-    
+
+    tmb.set_blank_symbol("#")
+    tmb.set_halt_state("HALT")
+
     tmb.add_transition(1, 0, 2, 1, TuringMachine.MOVE_RIGHT)
     tmb.add_transition(1, 1, 2, 0, TuringMachine.MOVE_RIGHT)
     tmb.add_transition(2, 0, 1, 0, TuringMachine.NON_MOVEMENT)
     tmb.add_transition(2, 1, 3, 1, TuringMachine.MOVE_RIGHT)
-    tmb.add_transition(3, 0, 'HALT', 0, TuringMachine.NON_MOVEMENT)
-    tmb.add_transition(3, 1, 'HALT', 1, TuringMachine.NON_MOVEMENT)
-    tmb.add_transition(3, '#', 'HALT', '#', TuringMachine.NON_MOVEMENT)
-    
+    tmb.add_transition(3, 0, "HALT", 0, TuringMachine.NON_MOVEMENT)
+    tmb.add_transition(3, 1, "HALT", 1, TuringMachine.NON_MOVEMENT)
+    tmb.add_transition(3, "#", "HALT", "#", TuringMachine.NON_MOVEMENT)
+
     tmb.set_initial_state(1)
     tmb.add_final_state(2)
-    
+
     print(tmb.create())

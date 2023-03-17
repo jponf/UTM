@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 
-from tm import TuringMachineParser, TuringMachine
+from utm.tm import TuringMachineParser, TuringMachine
 
 
 TEST_STR = """
@@ -39,22 +39,21 @@ FINAL 2
 
 
 class TestTuringMachineParser(TestCase):
-
     def test_parse_string(self):
         parser = TuringMachineParser()
         parser.parse_string(TEST_STR)
         tm = parser.create()
 
-        self.assertTrue(tm.is_word_accepted('0000'))
-        self.assertFalse(tm.is_word_accepted('1011'))
+        self.assertTrue(tm.is_word_accepted("0000"))
+        self.assertFalse(tm.is_word_accepted("1011"))
 
     def test_parse_utf8(self):
         parser = TuringMachineParser()
         parser.parse_string(TEST_UTF8)
         tm = parser.create()
 
-        self.assertTrue(tm.is_word_accepted('0000'))
-        self.assertFalse(tm.is_word_accepted('1011'))
+        self.assertTrue(tm.is_word_accepted("0000"))
+        self.assertFalse(tm.is_word_accepted("1011"))
 
     def test_create(self):
         parser = TuringMachineParser()
