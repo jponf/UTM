@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import os
-import pkgutil
+import importlib.resources
 import sys
 from typing import Final
 
 from PySide2 import QtGui, QtWidgets
 from PySide2.QtCore import Qt
 
-from utm import highlighters
+from utm import highlighters, resources as utm_resources
 from utm.tm import (
     BaseTuringMachineObserver,
     TuringMachine,
@@ -229,7 +229,7 @@ class GUI(QtWidgets.QWidget):
     #
 
     def _init_icon(self):
-        data = pkgutil.get_data("resources", "icon.png")
+        data = importlib.resources.read_binary(utm_resources, "icon.png")
         pix_map = QtGui.QPixmap()
         pix_map.loadFromData(data)
         self.setWindowIcon(QtGui.QIcon(pix_map))
