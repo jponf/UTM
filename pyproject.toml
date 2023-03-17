@@ -25,9 +25,9 @@ dependencies = ["PySide2~=5.12"]
 dynamic = ["version"]
 
 [project.urls]
-Documentation = "https://github.com/unknown/utm#readme"
-Issues = "https://github.com/unknown/utm/issues"
-Source = "https://github.com/unknown/utm"
+Documentation = "https://github.com/jponf/UTM/#readme"
+Issues = "https://github.com/jponf/UTM/issues"
+Source = "https://github.com/jponf/UTM"
 
 [tool.hatch.version]
 path = "utm/__init__.py"
